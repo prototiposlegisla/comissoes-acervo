@@ -15,14 +15,6 @@ webservice do SPLEGIS (https://splegisws.saopaulo.sp.leg.br/ws/ws2.asmx):
   filiacoes.csv        partidos de cada vereador, com as datas (VereadoresCMSP)
   cargos_comissoes.csv presidentes, vices e membros das 7 comissões, com as datas (VereadoresCMSP)
 
-e, de fora do SPLEGIS:
-
-  homenagens.csv       projetos desde 2013 que são homenagens (denominação de logradouros e
-                       próprios, datas comemorativas, honrarias), pelas palavras-chave que o
-                       projeto Pesquisa (https://github.com/prototiposlegisla/pesquisa) já baixa
-                       todo dia do SPLEGIS e publica. Lidas de lá, não pesam no SPLEGIS; se a
-                       leitura falhar, o arquivo anterior fica como está.
-
 Cada execução refaz os anos pedidos (pelo ano do projeto) e mantém os demais.
 
 Uso:
@@ -47,7 +39,6 @@ CAMPOS_AREAS = ["sigla", "nome"]
 CAMPOS_RELATORIAS = ["rotulo", "comissao", "despacho", "despachado_em", "relator", "partido", "parecer",
                      "parecer_em", "conclusao"]
 CAMPOS_ENCERRADOS = ["rotulo", "tipo", "ano", "leitura", "encerramento", "motivo"]
-CAMPOS_HOMENAGENS = ["rotulo"]
 CAMPOS_AUTORES = ["rotulo", "leitura", "ordem", "autor_codigo", "autor"]
 CAMPOS_VETOS = ["rotulo", "veto"]
 CAMPOS_FILIACOES = ["vereador", "partido", "inicio", "fim"]
@@ -56,13 +47,6 @@ CAMPOS_CARGOS = ["comissao", "cargo", "vereador", "inicio", "fim"]
 _NOMES_COMISSOES = [("JUSTIÇA", "CCJ"), ("FINANÇAS", "FIN"), ("POLÍTICA URBANA", "URB"), ("ADMINISTRAÇÃO PÚBLICA", "ADM"),
                     ("TRÂNSITO", "ECON"), ("EDUCAÇÃO", "EDUC"), ("SAÚDE", "SAUDE")]
 _RX_PARTIDO = re.compile(r"\(([^()]+)\)\s*$")
-# Os projetos publicados pelo Pesquisa, na branch gh-pages do repositório (a mesma que o leisp.com.br serve).
-URL_PESQUISA = "https://raw.githubusercontent.com/prototiposlegisla/pesquisa/gh-pages/"
-PRIMEIRO_ANO = 2013
-# Palavras-chave que marcam as homenagens: denominação de logradouros e próprios, datas e eventos
-# do calendário oficial, títulos e outras honrarias.
-HOMENAGENS = {"DENOMINACAO", "CONCESSAO HONORIFICA", "TITULO HONORIFICO", "CIDADAO PAULISTANO", "HOMENAGEM",
-              "DATA COMEMORATIVA", "CALENDARIO OFICIAL DE EVENTOS", "MEDALHA", "SALVA DE PRATA"}
 
 
 def _json(operacao: str) -> list:
@@ -109,27 +93,6 @@ def autores(itens: list[dict]) -> list[dict]:
 def vetos(itens: list[dict]) -> list[dict]:
     return [{"rotulo": f"{p['tipo']} {p['numero']}/{p['ano']}", "veto": ((p.get("veto") or {}).get("nome") or "").strip()}
             for p in itens if p.get("tipo") in TIPOS]
-
-
-def homenagens(camadas: list[dict]) -> list[dict]:
-    """Projetos que são homenagens, a partir das camadas do Pesquisa ({"columns": [...], "data": [...]})."""
-    saida = set()
-    for camada in camadas:
-        col = {c: k for k, c in enumerate(camada["columns"])}
-        for linha in camada["data"]:
-            tipo, ano = linha[col["tipo"]], int(linha[col["ano"]])
-            if tipo in TIPOS and ano >= PRIMEIRO_ANO and set(linha[col["palavras-chave"]].split(" | ")) & HOMENAGENS:
-                saida.add(f"{tipo} {linha[col['numero']]}/{ano}")
-    return [{"rotulo": r} for r in sorted(saida)]
-
-
-def camadas_do_pesquisa() -> list[dict]:
-    versao = json.loads(fontes.baixar_json(URL_PESQUISA + "dados/projetos/version.json"))
-    camadas = []
-    for info in versao["camadas"].values():
-        if max(int(a) for a in str(info["anos"]).split("-")) >= PRIMEIRO_ANO:
-            camadas.append(json.loads(fontes.baixar_json(URL_PESQUISA + info["arquivo"])))
-    return camadas
 
 
 def vereadores(itens: list[dict]) -> tuple[list[dict], list[dict]]:
@@ -179,13 +142,6 @@ def main(argv: list[str] | None = None) -> int:
     gravar_csv(C.DIR_DADOS / "cargos_comissoes.csv", CAMPOS_CARGOS,
                sorted(cargos, key=lambda c: (c["comissao"], c["inicio"], c["cargo"], c["vereador"])))
     log(f"vereadores: {len(filiacoes)} filiações, {len(cargos)} cargos nas comissões")
-
-    try:
-        hom = homenagens(camadas_do_pesquisa())
-        gravar_csv(C.DIR_DADOS / "homenagens.csv", CAMPOS_HOMENAGENS, hom)
-        log(f"homenagens.csv: {len(hom)} projetos, pelas palavras-chave do Pesquisa")
-    except Exception as e:  # o Pesquisa fora do ar não pode derrubar o resto
-        log(f"homenagens: não foi possível ler o Pesquisa ({e}); o arquivo anterior fica como está")
 
     rel, enc, aut = [], [], []
     for ano in anos:

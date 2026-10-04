@@ -2,7 +2,7 @@
 """Testes das relatorias, pareceres e desfechos tirados do webservice do SPLEGIS."""
 import unittest
 
-from coletor.legislativo import encerrados, homenagens, relatorias
+from coletor.legislativo import encerrados, relatorias
 from painel.legislativo import (autoria_dos_projetos, conclusao, desfecho, desfechos_dos_projetos, funil, membros, montar,
                                 partido_na_data, prazos)
 
@@ -57,13 +57,6 @@ class TestLegislativo(unittest.TestCase):
         self.assertEqual(partido_na_data(filiacoes, "FULANO", "2022-01-10T00:00:00"), "NOVO")
         self.assertEqual(partido_na_data(filiacoes, "FULANO", "2023-07-25T10:00:00"), "PL")
         self.assertEqual(partido_na_data(filiacoes, "FULANO", "2019-01-01"), "S/PARTIDO")  # antes da primeira
-
-    def test_homenagens_pelas_palavras_chave_do_pesquisa(self):
-        camada = {"columns": ["tipo", "numero", "ano", "norma", "ementa", "promoventes", "palavras-chave", "searchable"],
-                  "data": [["PL", "4", "2022", "", "", "", "DENOMINACAO | LOGRADOURO PUBLICO", ""],
-                           ["PL", "5", "2022", "", "", "", "ALTERACAO | ESCOLA MUNICIPAL", ""],
-                           ["PDL", "9", "2010", "", "", "", "CIDADAO PAULISTANO", ""]]}  # antes de 2013: fora
-        self.assertEqual(homenagens([camada]), [{"rotulo": "PL 4/2022"}])
 
     def test_autoria_e_desfecho_por_partido(self):
         filiacoes = {"FULANO": [("2020-01-01", "NOVO"), ("2024-01-01", "PL")]}
@@ -124,10 +117,9 @@ class TestLegislativo(unittest.TestCase):
                            "motivo": "Encerrado-PROMULGADO"},
                           {"tipo": "PL", "numero": 4, "ano": 2022, "leitura": "", "encerramento": "",
                            "motivo": "Encerrado-RETIRADO PELO AUTOR"}])
-        f = funil(rel, desfechos_dos_projetos(enc), autoria, {"PL 4/2022"}, [2022])
+        f = funil(rel, desfechos_dos_projetos(enc), autoria, [2022])
         self.assertEqual(f["etapa"], [2, 1, 5, 0])  # aprovado sem passar pelas comissões: conta em tudo
         self.assertEqual(f["comissoes"][0], 0b11)  # CCJ e FIN
-        self.assertEqual(f["homenagem"], [0, 0, 0, 1])
         self.assertEqual([f["desfechos"][d] for d in f["desfecho"]], ["aberto", "aberto", "lei", "retirado"])
         self.assertEqual([f["partidos"][p] if p >= 0 else "" for p in f["partido"]], ["PT", "PT", "", "PL"])
 

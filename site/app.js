@@ -2159,7 +2159,6 @@ const ETAPAS_FUNIL = {
 const PASSAGENS_FUNIL = { relator: "Ganhou relator", parecer: "Recebeu parecer", comissoes: "Passou pelas comissões",
                           aprovados: "Aprovado pela Câmara", lei: "Virou lei" };
 const AUTORIAS_FUNIL = [["", "Todas"], ["Vereadores", "Vereadores"], ["Executivo", "Executivo (prefeito)"], ["Mesa Diretora", "Mesa Diretora"]];
-const ASSUNTOS_FUNIL = [["", "Todos"], ["demais", "Sem homenagens"], ["homenagem", "Só homenagens"]];
 const SEGUIU = { chave: "seguiu", nome: "Seguiram adiante", cor: "--s1" };
 const PLURAL_PARADOS = { vetado: "vetados", rejeitado: "rejeitados ou ilegais", retirado: "retirados pelo autor",
   apensado: "apensados a outro", legislatura: "arquivados no fim da legislatura", outros: "com outro encerramento",
@@ -2201,18 +2200,14 @@ function renderFunil(l) {
   const cartao = document.getElementById("c-funil");
   const anos = anosEscolhidos(document.getElementById("f-anos-funil"));
   const autoriaSel = document.getElementById("f-autoria-funil");
-  const assuntoSel = document.getElementById("f-assunto-funil");
   preencherSeletor(autoriaSel, AUTORIAS_FUNIL, "");
-  preencherSeletor(assuntoSel, ASSUNTOS_FUNIL, "");
   const autoria = autoriaSel.value ? fn.autorias.indexOf(autoriaSel.value) : -1;
-  const homenagem = assuntoSel.value === "homenagem" ? 1 : assuntoSel.value === "demais" ? 0 : -1;
   const indices = fn.ano.map((_, i) => i).filter((i) => fn.ano[i] >= anos.de && fn.ano[i] <= anos.ate
-    && (autoria < 0 || fn.autoria[i] === autoria) && (homenagem < 0 || fn.homenagem[i] === homenagem));
+    && (autoria < 0 || fn.autoria[i] === autoria));
   const { n, parados } = contarFunil(fn, indices);
   const quem = { Executivo: "do Executivo", "Mesa Diretora": "da Mesa Diretora", Vereadores: "de vereadores" }[autoriaSel.value];
-  const quais = homenagem === 1 ? ", só homenagens," : homenagem === 0 ? ", sem as homenagens," : "";
   document.getElementById("sub-funil").textContent =
-    `Projetos (PL, PDL, PR e PLO) ${quem ? `${quem} ` : ""}apresentados de ${anos.texto}${quais} e até onde chegaram. ` +
+    `Projetos (PL, PDL, PR e PLO) ${quem ? `${quem} ` : ""}apresentados de ${anos.texto} e até onde chegaram. ` +
     `Viraram lei ${porcentoInteiro(n[n.length - 1] / (n[0] || 1))}. A parte colorida de cada barra mostra o que aconteceu ` +
     "com os que pararam ali. Os filtros de comissão, de matérias e de período não se aplicam.";
   legenda(cartao, [SEGUIU, ...PARADOS]);
@@ -2254,7 +2249,7 @@ function renderFunil(l) {
       k ? Math.round((1000 * n[k]) / (n[k - 1] || 1)) / 10 : null,
       ...PARADOS.map((x) => (k < fn.etapas.length - 1 ? parados[k][x.chave] : null))]),
     `funil-${document.getElementById("f-anos-funil").value}-${(autoriaSel.value || "todas").toLowerCase().replace(" ", "-")}` +
-    `${assuntoSel.value ? `-${assuntoSel.value}` : ""}.csv`));
+    ".csv"));
   cartao.querySelector(".acoes-csv").replaceChildren(botao);
 }
 
@@ -2264,9 +2259,6 @@ const GRUPOS_PASSAGEM = {
     const k = fn.autorias.indexOf(a);
     return { nome: a, teste: (i) => fn.autoria[i] === k };
   }) },
-  assunto: { nome: "assunto", grupos: (fn) => [
-    { nome: "Homenagens", teste: (i) => fn.homenagem[i] === 1 },
-    { nome: "Demais projetos", teste: (i) => fn.homenagem[i] === 0 }] },
   tipo: { nome: "tipo", grupos: (fn) => fn.tipos.map((t, k) => ({ nome: t, teste: (i) => fn.tipo[i] === k })) },
   // O projeto só aparece numa comissão depois de ganhar relator nela: as duas primeiras passagens não se aplicam.
   comissao: { nome: "comissão do despacho", ignorar: [0, 1], grupos: (fn) => fn.comissoes_nomes.map((s, k) => ({

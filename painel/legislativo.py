@@ -215,16 +215,16 @@ def desfechos_dos_projetos(encerrados: list[dict], vetos: list[dict] = ()) -> di
 
 
 def funil(relatorias: list[dict], fim: dict[str, str], autoria: dict[str, tuple[str, str]],
-          homenagens: set[str], anos: list[int]) -> dict:
+          anos: list[int]) -> dict:
     """Um registro por projeto apresentado nos `anos`, em colunas, para o funil do painel: ano,
-    tipo, autoria, partido do primeiro autor, se é homenagem, as comissões do primeiro despacho
+    tipo, autoria, partido do primeiro autor, as comissões do primeiro despacho
     (bits na ordem de COMISSOES_FUNIL), a etapa a que chegou e o desfecho."""
     por_projeto: dict[str, list[dict]] = defaultdict(list)
     for r in relatorias:
         por_projeto[r["rotulo"]].append(r)
     desfechos = [*DESFECHOS, "aberto"]
     partidos: dict[str, int] = {}
-    col = {k: [] for k in ("ano", "tipo", "autoria", "partido", "homenagem", "comissoes", "etapa", "desfecho")}
+    col = {k: [] for k in ("ano", "tipo", "autoria", "partido", "comissoes", "etapa", "desfecho")}
     for rotulo, (classe, partido) in sorted(autoria.items()):
         tipo, ano = rotulo.split()[0], int(rotulo.rsplit("/", 1)[1])
         if ano not in anos or tipo not in TIPOS_FUNIL:
@@ -239,7 +239,6 @@ def funil(relatorias: list[dict], fim: dict[str, str], autoria: dict[str, tuple[
         col["tipo"].append(TIPOS_FUNIL.index(tipo))
         col["autoria"].append(AUTORIAS.index(classe))
         col["partido"].append(partidos.setdefault(partido, len(partidos)) if partido else -1)
-        col["homenagem"].append(int(rotulo in homenagens))
         col["comissoes"].append(bits)
         col["etapa"].append(etapa_do_projeto(linhas, fim.get(rotulo)))
         col["desfecho"].append(desfechos.index(fim.get(rotulo, "aberto")))
@@ -248,8 +247,7 @@ def funil(relatorias: list[dict], fim: dict[str, str], autoria: dict[str, tuple[
 
 
 def montar(relatorias: list[dict], encerrados: list[dict], fim: str, filiacoes: list[dict] = (),
-           cargos: list[dict] = (), autores: list[dict] = (), vetos: list[dict] = (),
-           homenagens: list[dict] = ()) -> dict:
+           cargos: list[dict] = (), autores: list[dict] = (), vetos: list[dict] = ()) -> dict:
     meses = []
     m = date(2018, 11, 1)
     while m.isoformat()[:7] <= fim[:7]:
@@ -335,5 +333,5 @@ def montar(relatorias: list[dict], encerrados: list[dict], fim: str, filiacoes: 
         "desfechos_partido": dict(sorted(por_partido.items())),
         "prazos": prazos(relatorias, autoria, anos),
         "membros": membros(cargos, por_vereador, fim),
-        "funil": funil(relatorias, fim_de, autoria, {h["rotulo"] for h in homenagens}, anos),
+        "funil": funil(relatorias, fim_de, autoria, anos),
     }
