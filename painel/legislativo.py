@@ -115,6 +115,8 @@ def autoria_dos_projetos(autores: list[dict], filiacoes: dict[str, list[tuple]])
 def _quartis(v: list[int]) -> tuple:
     if len(v) < MINIMO_PRAZOS:
         return None, None, None
+    if len(v) == 1:  # o Python 3.12, o do GitHub Actions, não calcula quantis de um valor só
+        return v[0], v[0], v[0]
     q = quantiles(v, n=4, method="inclusive")
     return round(q[0]), round(q[1]), round(q[2])
 
