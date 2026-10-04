@@ -1751,25 +1751,6 @@ async function carregarLegislativo() {
 const nomeProprio = (t) => t.toLowerCase().split(" ").map((p, i) =>
   (i && ["a", "ao", "as", "com", "da", "das", "de", "do", "dos", "e", "em", "na", "nas", "no", "nos", "o", "os", "para", "por"].includes(p) ? p : p.charAt(0).toUpperCase() + p.slice(1))).join(" ");
 
-// O vocabulário de assuntos da Câmara vem em maiúsculas e sem acento: devolve os acentos das
-// palavras que aparecem entre os assuntos mais frequentes ("-CAO" vira "-ção", "-AO" vira "-ão").
-const ACENTOS = Object.fromEntries(("água alvará área artística assistência auxílio beneficiário calçada cálculo " +
-  "calendário cobrança concessionária condomínio convivência coronavírus criança deficiência diagnóstico doença " +
-  "doméstica doméstico edifício emergência espaço exigência família física físico gênero história honorífica " +
-  "honorífico horário jurídica licença mãe matrícula médica médico móvel munícipe ônibus patrimônio permanência " +
-  "praça prêmio presença proprietário psicológica pública público públicos resíduos salário sanitário saúde " +
-  "segurança serviços sólidos tecnológica título transferência trânsito transparência único usuário veículos " +
-  "violência vítima cão").split(" ").map((p) => [p.normalize("NFD").replace(/[\u0300-\u036f]/g, ""), p]));
-const ASSUNTO_PROPRIO = [[/\bsão paulo\b/, "São Paulo"], [/\banchieta\b/, "Anchieta"], [/\bcovid 19\b/, "Covid-19"],
-  [/\b(iptu|iss|ong)\b/g, (m) => m.toUpperCase()], [/\blgbtqiapn\b/, "LGBTQIAPN+"]];
-function nomeAssunto(termo) {
-  let t = termo.toLowerCase().split(" ").map((p) => ACENTOS[p] ??
-    (p.length > 3 && p.endsWith("cao") ? p.slice(0, -3) + "ção" : p.length > 2 && p.endsWith("ao") ? p.slice(0, -2) + "ão" : p)).join(" ");
-  for (const [rx, troca] of ASSUNTO_PROPRIO) t = t.replace(rx, troca);
-  t = t.replace(/\(\s+/g, "(").replace(/\s+\)/g, ")");
-  return t.charAt(0).toUpperCase() + t.slice(1);
-}
-
 // Índices [i0, i1) dos meses de `meses` (AAAA-MM) que entram no período escolhido.
 function mesesDoPeriodo(meses) {
   const [inicio, fim] = periodoEscolhido().map((d) => dataISO(d).slice(0, 7));
@@ -1870,33 +1851,6 @@ function renderRelatores(l) {
     arquivo: `${porPartido ? "partidos" : "relatores"}-${estado.comissao.toLowerCase()}-${estado.periodo}.csv` });
 }
 
-function renderAssuntos(l) {
-  const cartao = document.getElementById("c-assuntos");
-  const [i0, i1] = mesesDoPeriodo(l.meses);
-  const lista = l.assuntos_por_mes[estado.comissao] ?? [];
-  const contagem = new Map();
-  for (let k = 0; k < lista.length; k += 3) {
-    if (lista[k] < i0 || lista[k] >= i1) continue;
-    contagem.set(lista[k + 1], (contagem.get(lista[k + 1]) ?? 0) + lista[k + 2]);
-  }
-  const chegadas = d3.sum((l.chegadas_com_assunto[estado.comissao] ?? []).slice(i0, i1));
-  const itens = [...contagem].sort((a, b) => b[1] - a[1]).map(([t, n]) => {
-    const rotulo = nomeAssunto(l.assuntos[t]);
-    return { chave: t, rotulo, n, titulo: `${rotulo}: ${fmt(n)} projetos (${porcento(n, chegadas)} dos que chegaram)` };
-  });
-  const onde = estado.comissao === "TODAS" ? "às comissões" : `à ${rotuloComissao(estado.comissao)}`;
-  document.getElementById("sub-assuntos").textContent =
-    `Assuntos dos ${fmt(chegadas)} projetos que chegaram ${onde} ${textoPeriodo()}, no vocabulário que a Câmara usa ` +
-    "para indexar os projetos. Um projeto costuma ter vários assuntos; termos genéricos, como criação ou alteração, ficam de fora.";
-  preencherRanking(cartao, itens, {
-    vazio: "Nenhum projeto com assunto neste recorte.", redesenhar: () => renderAssuntos(l), maximoTodos: 60,
-    valor: (it) => porcento(it.n, chegadas),
-    cabecalho: ["assunto", "projetos", "parte dos que chegaram (%)"],
-    linhaCsv: (it) => [l.assuntos[it.chave], it.n, Math.round((1000 * it.n) / (chegadas || 1)) / 10],
-    arquivo: `assuntos-${estado.comissao.toLowerCase()}-${estado.periodo}.csv` });
-}
-
-// Linha do tempo de quem presidiu cada comissão (ou, numa comissão, presidente e vice).
 function renderPresidentes(l) {
   const cartao = document.getElementById("c-presidentes");
   const c = cores();
@@ -2431,7 +2385,7 @@ function renderDesfechos(l) {
 }
 
 function renderLegislativo(l, t, nomes, ultimoDia) {
-  const cartoes = ["c-pareceres", "c-relatores", "c-desfechos", "c-presidentes", "c-assuntos", "c-prazos", "c-membros", "c-funil", "c-passagem",
+  const cartoes = ["c-pareceres", "c-relatores", "c-desfechos", "c-presidentes", "c-prazos", "c-membros", "c-funil", "c-passagem",
                    "c-saidas"]
     .map((id) => document.getElementById(id));
   for (const cartao of cartoes) cartao.querySelector(".erro-fluxos")?.remove();
@@ -2445,7 +2399,6 @@ function renderLegislativo(l, t, nomes, ultimoDia) {
   renderRelatores(l);
   renderPresidentes(l);
   renderMembros(l, ultimoDia);
-  renderAssuntos(l);
   renderDesfechos(l);
   renderFunil(l);
   renderPassagem(l);

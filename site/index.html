@@ -278,17 +278,6 @@
       <div class="grafico" tabindex="0"></div>
       <div class="rodape-cartao"><div class="acoes"></div></div>
     </figure>
-    <figure class="cartao" id="c-assuntos" data-curto="Assuntos">
-      <div class="cartao-topo">
-        <div>
-          <h2>Assuntos dos projetos que chegaram</h2>
-          <p class="sub" id="sub-assuntos"></p>
-        </div>
-      </div>
-      <ol class="ranking"></ol>
-      <button class="botao mais" type="button"></button>
-      <div class="rodape-cartao"><div class="acoes acoes-csv"></div></div>
-    </figure>
     <figure class="cartao" id="c-idade" data-curto="Idade">
       <div class="cartao-topo">
         <div>
@@ -508,7 +497,7 @@
       </div>
       <ul class="legenda"></ul>
       <ol class="funil"></ol>
-      <p class="nota-grafico">As etapas são encaixadas: o projeto que chegou a uma conta também em todas as anteriores. Ganhar relator e receber parecer valem para qualquer comissão; passar por todas as comissões é ter o parecer de cada uma das que constam no primeiro despacho. Aprovados pela Câmara são os que viraram lei e os vetados por inteiro pelo prefeito, inclusive os vetos que a Câmara ainda não apreciou (o SPLEGIS só encerra o projeto vetado quando o veto é votado, às vezes anos depois; o veto aparece antes, na lista de projetos vetados). Com veto parcial, o projeto já conta como lei. Alguns poucos projetos são aprovados sem o parecer de todas as comissões (o parecer é dado em plenário, quando o prazo das comissões vence); eles contam como se tivessem passado por elas. Homenagens são os projetos com assunto de denominação (de ruas, praças e próprios), data comemorativa, evento do calendário oficial, título ou outra honraria. Nos anos recentes, muitos projetos ainda tramitam e podem avançar.</p>
+      <p class="nota-grafico">As etapas são encaixadas: o projeto que chegou a uma conta também em todas as anteriores. Ganhar relator e receber parecer valem para qualquer comissão; passar por todas as comissões é ter o parecer de cada uma das que constam no primeiro despacho. Aprovados pela Câmara são os que viraram lei e os vetados por inteiro pelo prefeito, inclusive os vetos que a Câmara ainda não apreciou (o SPLEGIS só encerra o projeto vetado quando o veto é votado, às vezes anos depois; o veto aparece antes, na lista de projetos vetados). Com veto parcial, o projeto já conta como lei. Alguns poucos projetos são aprovados sem o parecer de todas as comissões (o parecer é dado em plenário, quando o prazo das comissões vence); eles contam como se tivessem passado por elas. Homenagens são os projetos com palavra-chave de denominação (de ruas, praças e próprios), data comemorativa, evento do calendário oficial, título ou outra honraria, no vocabulário que a Câmara usa para indexar os projetos. Nos anos recentes, muitos projetos ainda tramitam e podem avançar.</p>
       <div class="rodape-cartao"><div class="acoes acoes-csv"></div></div>
     </figure>
     <figure class="cartao" id="c-passagem" data-curto="Gargalos">
@@ -615,7 +604,7 @@
           <li><strong>Indicadores.</strong> A idade conta dias completos desde o recebimento pela comissão (ou desde a entrada no estado atual), nas faixas de até 30, 31 a 90, 91 a 180, 181 a 365 e mais de 365 dias. Matérias enviadas e ainda não recebidas fazem parte do acervo, como no relatório.</li>
           <li><strong>Etapas.</strong> O último passo interno de cada matéria indica em que etapa ela está: sem relator, em estudo, em diligência, na pauta ou votada. Antes da coleta diária, é assim que se estima quantas estavam sem relator.</li>
           <li><strong>Composição.</strong> A legislatura de apresentação sai do ano no número da matéria (o PL 502/2026 é da legislatura 2025–2028). A autoria é a do primeiro autor; os prefeitos são reconhecidos pelo código de autor no SPLEGIS, diferente do que a mesma pessoa tinha como vereador.</li>
-          <li><strong>Relatores e desfechos.</strong> O relator, o parecer e a conclusão de cada projeto em cada comissão, como o projeto terminou (lei, veto, retirada, arquivamento), os autores e os assuntos de cada projeto, os presidentes e membros das comissões e as filiações partidárias dos vereadores vêm do webservice do SPLEGIS, coletados uma vez por dia.</li>
+          <li><strong>Relatores e desfechos.</strong> O relator, o parecer e a conclusão de cada projeto em cada comissão, como o projeto terminou (lei, veto, retirada, arquivamento), os autores de cada projeto, os presidentes e membros das comissões e as filiações partidárias dos vereadores vêm do webservice do SPLEGIS, coletados uma vez por dia.</li>
           <li><strong>Votações e tempos.</strong> A votação de uma matéria numa comissão é o primeiro passo interno de matéria votada, ou a saída aprovada em reunião conjunta. O tempo de cada etapa vai de um passo ao primeiro passo da etapa seguinte. Desde o início da coleta diária, os passos internos também vêm do feed do SPLEGIS.</li>
           <li><strong>Entradas e saídas.</strong> Cada passagem de uma matéria por uma comissão vai do envio a ela até o envio para outra área, com a origem e o destino. Desde o início da coleta diária, a hora e o destino de cada saída vêm das tramitações que o SPLEGIS registra no dia.</li>
           <li><strong>Trajetórias.</strong> A trajetória de cada projeto junta as passagens pelas comissões, a área para onde ele foi enviado ao sair de cada uma (o último envio conhecido, até chegar à comissão seguinte ou ao desfecho) e o desfecho do cadastro de projetos encerrados. A fase dentro da comissão é a etapa do último passo interno.</li>

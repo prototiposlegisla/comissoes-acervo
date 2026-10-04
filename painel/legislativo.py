@@ -8,8 +8,6 @@ partir do que coletor/legislativo.py guarda do webservice do SPLEGIS:
 - relatores: quantos pareceres cada relator deu em cada comissão, por mês, com o partido do
   relator na data do parecer (pelas filiações do cadastro de vereadores);
 - presidentes: quem presidiu (e foi vice de) cada comissão, com as datas;
-- assuntos: os assuntos dos projetos que chegaram a cada comissão, por mês, sem os termos
-  genéricos do vocabulário (criação, alteração, prazo...);
 - desfechos: como terminaram os projetos apresentados em cada ano (lei, veto, rejeição,
   retirada, apensamento, arquivamento no fim da legislatura) e quantos seguem em tramitação,
   também pela autoria e pelo partido do primeiro autor;
@@ -19,7 +17,6 @@ partir do que coletor/legislativo.py guarda do webservice do SPLEGIS:
 """
 from __future__ import annotations
 
-import re
 import unicodedata
 from bisect import bisect_right
 from collections import defaultdict
@@ -32,22 +29,9 @@ from reconstrucao.serie import TODAS
 CONCLUSOES = ["favoravel", "legalidade", "ilegalidade", "contrario", "outros"]
 DESFECHOS = ["lei", "vetado", "rejeitado", "retirado", "apensado", "legislatura", "outros"]
 PRIMEIRO_ANO = 2013
-# Termos do vocabulário que descrevem a ação do projeto, não o assunto.
-GENERICOS = set("""ALTERACAO CRIACAO EVENTOS INFORMACAO DIVULGACAO PARCERIA AUTORIZACAO PRAZO PROIBICAO ACESSO
-INCENTIVO COMBATE PMSP CONVENIO OBRIGATORIEDADE IDENTIFICACAO VALOR ATENDIMENTO SETOR_PRIVADO CONSCIENTIZACAO
-REDUCAO PROTECAO POLITICAS_PUBLICAS FISCALIZACAO CMSP SOCIEDADE_CIVIL ACOMPANHAMENTO PAGAMENTO CADASTRO INSTALACAO
-MULTA PENALIDADE UTILIZACAO MEMBROS ORIENTACAO PERCENTAGEM INCLUSAO PRIORIDADE QUANTIDADE COMPROVACAO APOIO
-COMPETENCIA PARTICIPACAO NORMAS PERIODO DADOS DISPONIBILIDADE RESPONSAVEL CRITERIOS GARANTIA LIMITACAO DESTINACAO
-CONTRATACAO AVALIACAO REVOGACAO FUNCIONAMENTO DENUNCIA DIRETRIZ FORNECIMENTO VALORIZACAO ORGAOS_PUBLICOS
-ORGAOS_MUNICIPAIS RISCOS MANUTENCAO VAGA COMERCIALIZACAO PRESTACAO_DE_SERVICO AUMENTO PROGRAMA REQUISITOS AMPLIACAO
-RELATORIO TREINAMENTO RESPONSABILIDADE BENEFICIO VENDA AQUISICAO ENCAMINHAMENTO IDADE INTEGRACAO PREVENCAO
-SEGURANCA GRATUIDADE ISENCAO EMPRESA PLACA IMOVEL RECURSOS_FINANCEIROS CURSOS COMUNICACAO PUBLICIDADE CONSTRUCAO
-SERVIDOR HOMENAGEM""".replace("_", " ").split()) | {"SETOR PRIVADO", "POLITICAS PUBLICAS", "SOCIEDADE CIVIL",
-    "ORGAOS PUBLICOS", "ORGAOS MUNICIPAIS", "PRESTACAO DE SERVICO", "RECURSOS FINANCEIROS"}
 AUTORIAS = ["Vereadores", "Executivo", "Mesa Diretora", "Outros"]
 TODAS_AUTORIAS = "Todas"
 MINIMO_PRAZOS = 10  # pareceres para a mediana de um ano entrar no gráfico
-_RX_NORMA = re.compile(r"^(LEI|DECRETO|EMENDA|RESOLUCAO|PORTARIA)\b")
 
 
 def _texto(t: str) -> str:
@@ -89,10 +73,6 @@ def partido_na_data(filiacoes: dict[str, list[tuple]], vereador: str, data: str)
     lista = filiacoes.get(vereador, [])
     k = bisect_right(lista, (data[:10] + "~",)) - 1
     return lista[k][1] if k >= 0 else (lista[0][1] if lista else "")
-
-
-def assunto_util(termo: str) -> bool:
-    return bool(termo) and termo not in GENERICOS and not _RX_NORMA.match(termo)
 
 
 def autoria_dos_projetos(autores: list[dict], filiacoes: dict[str, list[tuple]]) -> dict[str, tuple[str, str]]:
@@ -201,10 +181,6 @@ def membros(cargos: list[dict], filiacoes: dict[str, list[tuple]], fim: str) -> 
 ETAPAS_FUNIL = ["apresentados", "relator", "parecer", "comissoes", "aprovados", "lei"]
 
 
-# Assuntos que marcam as homenagens: denominação de logradouros e próprios, datas e eventos do
-# calendário oficial, títulos e outras honrarias.
-HOMENAGENS = {"DENOMINACAO", "CONCESSAO HONORIFICA", "TITULO HONORIFICO", "CIDADAO PAULISTANO", "HOMENAGEM",
-              "DATA COMEMORATIVA", "CALENDARIO OFICIAL DE EVENTOS", "MEDALHA", "SALVA DE PRATA"}
 TIPOS_FUNIL = ["PL", "PDL", "PR", "PLO"]
 COMISSOES_FUNIL = ["CCJ", "FIN", "URB", "ADM", "ECON", "EDUC", "SAUDE"]
 
@@ -239,14 +215,13 @@ def desfechos_dos_projetos(encerrados: list[dict], vetos: list[dict] = ()) -> di
 
 
 def funil(relatorias: list[dict], fim: dict[str, str], autoria: dict[str, tuple[str, str]],
-          assuntos: list[dict], anos: list[int]) -> dict:
+          homenagens: set[str], anos: list[int]) -> dict:
     """Um registro por projeto apresentado nos `anos`, em colunas, para o funil do painel: ano,
     tipo, autoria, partido do primeiro autor, se é homenagem, as comissões do primeiro despacho
     (bits na ordem de COMISSOES_FUNIL), a etapa a que chegou e o desfecho."""
     por_projeto: dict[str, list[dict]] = defaultdict(list)
     for r in relatorias:
         por_projeto[r["rotulo"]].append(r)
-    temas = {a["rotulo"]: set(a["assuntos"].split(" | ")) for a in assuntos}
     desfechos = [*DESFECHOS, "aberto"]
     partidos: dict[str, int] = {}
     col = {k: [] for k in ("ano", "tipo", "autoria", "partido", "homenagem", "comissoes", "etapa", "desfecho")}
@@ -264,7 +239,7 @@ def funil(relatorias: list[dict], fim: dict[str, str], autoria: dict[str, tuple[
         col["tipo"].append(TIPOS_FUNIL.index(tipo))
         col["autoria"].append(AUTORIAS.index(classe))
         col["partido"].append(partidos.setdefault(partido, len(partidos)) if partido else -1)
-        col["homenagem"].append(int(bool(temas.get(rotulo, set()) & HOMENAGENS)))
+        col["homenagem"].append(int(rotulo in homenagens))
         col["comissoes"].append(bits)
         col["etapa"].append(etapa_do_projeto(linhas, fim.get(rotulo)))
         col["desfecho"].append(desfechos.index(fim.get(rotulo, "aberto")))
@@ -272,9 +247,9 @@ def funil(relatorias: list[dict], fim: dict[str, str], autoria: dict[str, tuple[
             "comissoes_nomes": COMISSOES_FUNIL, "desfechos": desfechos, **col}
 
 
-def montar(relatorias: list[dict], encerrados: list[dict], contagem: list[dict], fim: str,
-           filiacoes: list[dict] = (), cargos: list[dict] = (), assuntos: list[dict] = (),
-           passagens: list[dict] = (), autores: list[dict] = (), vetos: list[dict] = ()) -> dict:
+def montar(relatorias: list[dict], encerrados: list[dict], fim: str, filiacoes: list[dict] = (),
+           cargos: list[dict] = (), autores: list[dict] = (), vetos: list[dict] = (),
+           homenagens: list[dict] = ()) -> dict:
     meses = []
     m = date(2018, 11, 1)
     while m.isoformat()[:7] <= fim[:7]:
@@ -306,9 +281,11 @@ def montar(relatorias: list[dict], encerrados: list[dict], contagem: list[dict],
             por_relator[r["comissao"]][(i, idx, p)] += 1
 
     anos = list(range(PRIMEIRO_ANO, int(fim[:4]) + 1))
+    # Projetos apresentados por ano: os que têm autor registrado (ProjetosAutores lista todos).
     apresentados = defaultdict(int)
-    for c in contagem:
-        apresentados[int(c["ano"])] += int(c["projetos"])
+    for rotulo in {a["rotulo"] for a in autores}:
+        if rotulo.split()[0] in TIPOS_FUNIL:
+            apresentados[int(rotulo.rsplit("/", 1)[1])] += 1
     desfechos = {k: [0] * len(anos) for k in DESFECHOS}
     fim_de = desfechos_dos_projetos(encerrados, vetos)
     for rotulo, k in fim_de.items():
@@ -339,31 +316,6 @@ def montar(relatorias: list[dict], encerrados: list[dict], contagem: list[dict],
             presidentes[c["comissao"]].append([c["cargo"], c["vereador"], partido_na_data(por_vereador, c["vereador"], c["inicio"]),
                                                c["inicio"][:10], c["fim"][:10]])
 
-    # Assuntos dos projetos pela chegada a cada comissão (e, em TODAS, pela primeira chegada).
-    termos_por = {a["rotulo"]: [t for t in a["assuntos"].split(" | ") if assunto_util(t)] for a in assuntos}
-    # Só os 300 assuntos mais frequentes: a cauda longa do vocabulário pesaria no arquivo sem aparecer na lista.
-    frequencia = defaultdict(int)
-    for lista in termos_por.values():
-        for t in lista:
-            frequencia[t] += 1
-    principais = set(sorted(frequencia, key=lambda t: -frequencia[t])[:300])
-    termos_por = {r: [t for t in lista if t in principais] for r, lista in termos_por.items()}
-    termos: dict[str, int] = {}
-    por_assunto: dict[str, dict[tuple, int]] = defaultdict(lambda: defaultdict(int))
-    chegadas: dict[str, list[int]] = defaultdict(lambda: [0] * len(meses))
-    primeira: dict[str, str] = {}
-    for p in passagens:
-        if p["desde"] and p["rotulo"] in termos_por:
-            primeira[p["rotulo"]] = min(primeira.get(p["rotulo"], p["desde"]), p["desde"])
-    entradas = [(p["comissao"], p["rotulo"], p["desde"]) for p in passagens if p["desde"] and p["rotulo"] in termos_por]
-    entradas += [(TODAS, r, d) for r, d in primeira.items()]
-    for comissao, rotulo, desde in entradas:
-        if desde[:7] not in pos:
-            continue
-        i = pos[desde[:7]]
-        chegadas[comissao][i] += 1
-        for t in termos_por[rotulo]:
-            por_assunto[comissao][(i, termos.setdefault(t, len(termos)))] += 1
     return {
         "meses": meses,
         "pareceres": pareceres,
@@ -373,10 +325,6 @@ def montar(relatorias: list[dict], encerrados: list[dict], contagem: list[dict],
         "pareceres_por_relator": {c: [v for (i, idx, p), n in sorted(d.items()) for v in (i, idx, p, n)]
                                   for c, d in por_relator.items()},
         "presidentes": presidentes,  # por comissão: [cargo, vereador, partido no início, início, fim]
-        "assuntos": list(termos),
-        # por comissão: [mês, assunto, projetos que chegaram, ...]; chegadas: projetos com assunto por mês
-        "assuntos_por_mes": {c: [v for (i, t), n in sorted(d.items()) for v in (i, t, n)] for c, d in por_assunto.items()},
-        "chegadas_com_assunto": chegadas,
         "anos": anos,
         "apresentados": [apresentados.get(a) for a in anos],
         "desfechos": desfechos,
@@ -387,5 +335,5 @@ def montar(relatorias: list[dict], encerrados: list[dict], contagem: list[dict],
         "desfechos_partido": dict(sorted(por_partido.items())),
         "prazos": prazos(relatorias, autoria, anos),
         "membros": membros(cargos, por_vereador, fim),
-        "funil": funil(relatorias, fim_de, autoria, assuntos, anos),
+        "funil": funil(relatorias, fim_de, autoria, {h["rotulo"] for h in homenagens}, anos),
     }

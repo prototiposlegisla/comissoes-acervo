@@ -2,8 +2,8 @@
 """Testes das relatorias, pareceres e desfechos tirados do webservice do SPLEGIS."""
 import unittest
 
-from coletor.legislativo import encerrados, relatorias
-from painel.legislativo import (assunto_util, autoria_dos_projetos, conclusao, desfecho, desfechos_dos_projetos, funil, membros, montar,
+from coletor.legislativo import encerrados, homenagens, relatorias
+from painel.legislativo import (autoria_dos_projetos, conclusao, desfecho, desfechos_dos_projetos, funil, membros, montar,
                                 partido_na_data, prazos)
 
 
@@ -42,7 +42,9 @@ class TestLegislativo(unittest.TestCase):
                 "conclusao": "", "despacho": "1", "despachado_em": "2025-02-01T10:00:00"}]
         enc = encerrados([{"tipo": "PL", "numero": 1, "ano": 2025, "leitura": "2025-01-06T00:00:00",
                            "encerramento": "2025-12-01T10:00:00", "motivo": "Encerrado-PROMULGADO"}])
-        j = montar(rel, enc, [{"ano": "2025", "tipo": "PL", "projetos": "10"}], "2026-10-03")
+        autores = [{"rotulo": f"PL {n}/2025", "leitura": "", "ordem": "1", "autor_codigo": "7", "autor": "FULANO"}
+                   for n in range(1, 11)]  # 10 projetos apresentados em 2025
+        j = montar(rel, enc, "2026-10-03", autores=autores)
         k = j["meses"].index("2025-03")
         self.assertEqual(j["pareceres"]["CCJ"]["legalidade"][k], 1)
         self.assertEqual(j["pareceres"]["TODAS"]["legalidade"][k], 1)
@@ -50,15 +52,18 @@ class TestLegislativo(unittest.TestCase):
         a = j["anos"].index(2025)
         self.assertEqual((j["desfechos"]["lei"][a], j["em_tramitacao"][a]), (1, 9))
 
-    def test_partido_na_data_e_assuntos(self):
+    def test_partido_na_data(self):
         filiacoes = {"FULANO": [("2020-03-11", "S/PARTIDO"), ("2021-06-01", "NOVO"), ("2023-07-25", "PL")]}
         self.assertEqual(partido_na_data(filiacoes, "FULANO", "2022-01-10T00:00:00"), "NOVO")
         self.assertEqual(partido_na_data(filiacoes, "FULANO", "2023-07-25T10:00:00"), "PL")
         self.assertEqual(partido_na_data(filiacoes, "FULANO", "2019-01-01"), "S/PARTIDO")  # antes da primeira
-        self.assertFalse(assunto_util("ALTERACAO"))
-        self.assertFalse(assunto_util("LEI 14.485/2007"))
-        self.assertTrue(assunto_util("PESSOA COM DEFICIENCIA"))
 
+    def test_homenagens_pelas_palavras_chave_do_pesquisa(self):
+        camada = {"columns": ["tipo", "numero", "ano", "norma", "ementa", "promoventes", "palavras-chave", "searchable"],
+                  "data": [["PL", "4", "2022", "", "", "", "DENOMINACAO | LOGRADOURO PUBLICO", ""],
+                           ["PL", "5", "2022", "", "", "", "ALTERACAO | ESCOLA MUNICIPAL", ""],
+                           ["PDL", "9", "2010", "", "", "", "CIDADAO PAULISTANO", ""]]}  # antes de 2013: fora
+        self.assertEqual(homenagens([camada]), [{"rotulo": "PL 4/2022"}])
 
     def test_autoria_e_desfecho_por_partido(self):
         filiacoes = {"FULANO": [("2020-01-01", "NOVO"), ("2024-01-01", "PL")]}
@@ -69,7 +74,7 @@ class TestLegislativo(unittest.TestCase):
         self.assertEqual(autoria_dos_projetos(autores, filiacoes),
                          {"PL 1/2023": ("Vereadores", "NOVO"), "PL 2/2023": ("Executivo", ""), "PR 3/2023": ("Mesa Diretora", "")})
         enc = encerrados([{"tipo": "PL", "numero": 1, "ano": 2023, "leitura": "", "encerramento": "", "motivo": "Encerrado-PROMULGADO"}])
-        j = montar([], enc, [], "2026-10-03", autores=autores,
+        j = montar([], enc, "2026-10-03", autores=autores,
                    filiacoes=[{"vereador": "FULANO", "partido": "NOVO", "inicio": "2020-01-01", "fim": ""}])
         a = j["anos"].index(2023)
         self.assertEqual(j["desfechos_partido"]["NOVO"]["lei"][a], 1)
@@ -119,8 +124,7 @@ class TestLegislativo(unittest.TestCase):
                            "motivo": "Encerrado-PROMULGADO"},
                           {"tipo": "PL", "numero": 4, "ano": 2022, "leitura": "", "encerramento": "",
                            "motivo": "Encerrado-RETIRADO PELO AUTOR"}])
-        ass = [{"rotulo": "PL 4/2022", "assuntos": "DENOMINACAO | LOGRADOURO PUBLICO"}]
-        f = funil(rel, desfechos_dos_projetos(enc), autoria, ass, [2022])
+        f = funil(rel, desfechos_dos_projetos(enc), autoria, {"PL 4/2022"}, [2022])
         self.assertEqual(f["etapa"], [2, 1, 5, 0])  # aprovado sem passar pelas comissões: conta em tudo
         self.assertEqual(f["comissoes"][0], 0b11)  # CCJ e FIN
         self.assertEqual(f["homenagem"], [0, 0, 0, 1])

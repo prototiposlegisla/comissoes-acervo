@@ -137,11 +137,11 @@ def main() -> int:
     arquivo.write_text(json.dumps(conteudo, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     log(f"{arquivo.name}: {len(conteudo['projetos']['rotulo'])} projetos, {arquivo.stat().st_size / 1e6:.1f} MB")
 
-    conteudo = legislativo.montar(ler_csv(C.DIR_DADOS / "relatorias.csv"), ler_csv(C.DIR_DADOS / "encerrados.csv"),
-                                  ler_csv(C.DIR_DADOS / "projetos_por_ano.csv"), max(c["data"] for c in coletas),
-                                  ler_csv(C.DIR_DADOS / "filiacoes.csv"), ler_csv(C.DIR_DADOS / "cargos_comissoes.csv"),
-                                  ler_csv(C.DIR_DADOS / "assuntos.csv"), lista, ler_csv(C.DIR_DADOS / "autores.csv"),
-                                  ler_csv(C.DIR_DADOS / "vetos.csv"))
+    conteudo = legislativo.montar(
+        ler_csv(C.DIR_DADOS / "relatorias.csv"), ler_csv(C.DIR_DADOS / "encerrados.csv"), max(c["data"] for c in coletas),
+        filiacoes=ler_csv(C.DIR_DADOS / "filiacoes.csv"), cargos=ler_csv(C.DIR_DADOS / "cargos_comissoes.csv"),
+        autores=ler_csv(C.DIR_DADOS / "autores.csv"), vetos=ler_csv(C.DIR_DADOS / "vetos.csv"),
+        homenagens=ler_csv(C.DIR_DADOS / "homenagens.csv"))
     eventos = [{"data": e["data"], "texto": e["texto"], "descricao": e["descricao"]} for e in ler_csv(C.DIR_DADOS / "eventos.csv")]
     (SAIDA / "eventos.json").write_text(json.dumps(eventos, ensure_ascii=False), encoding="utf-8")
     arquivo = SAIDA / "legislativo.json"

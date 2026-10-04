@@ -8,8 +8,6 @@ webservice do SPLEGIS (https://splegisws.saopaulo.sp.leg.br/ws/ws2.asmx):
                        por despacho (ProjetosReunioesDeComissao)
   encerrados.csv       como terminou cada projeto encerrado: lei, veto, arquivamento...
                        (ProjetosEncerrados)
-  projetos_por_ano.csv quantos projetos de cada tipo foram apresentados por ano (ProjetosPorAno)
-  assuntos.csv         assuntos de cada projeto, no vocabulário da Câmara (ProjetosAssuntos)
   autores.csv          autores de cada projeto, na ordem, com a data de leitura (ProjetosAutores)
   vetos.csv            projetos vetados, total ou parcialmente, pelos autores de autores.csv
                        (ProjetosVetadosPorPromovente). O veto aparece aqui logo que é dado; em
@@ -17,11 +15,19 @@ webservice do SPLEGIS (https://splegisws.saopaulo.sp.leg.br/ws/ws2.asmx):
   filiacoes.csv        partidos de cada vereador, com as datas (VereadoresCMSP)
   cargos_comissoes.csv presidentes, vices e membros das 7 comissões, com as datas (VereadoresCMSP)
 
+e, de fora do SPLEGIS:
+
+  homenagens.csv       projetos desde 2013 que são homenagens (denominação de logradouros e
+                       próprios, datas comemorativas, honrarias), pelas palavras-chave que o
+                       projeto Pesquisa (https://github.com/prototiposlegisla/pesquisa) já baixa
+                       todo dia do SPLEGIS e publica. Lidas de lá, não pesam no SPLEGIS; se a
+                       leitura falhar, o arquivo anterior fica como está.
+
 Cada execução refaz os anos pedidos (pelo ano do projeto) e mantém os demais.
 
 Uso:
-  python -m coletor.legislativo                     os últimos 8 anos (contagem: os 2 últimos)
-  python -m coletor.legislativo --desde 2013        do ano dado até o atual, contagem inclusive
+  python -m coletor.legislativo                     os últimos 8 anos
+  python -m coletor.legislativo --desde 2013        do ano dado até o atual
 """
 from __future__ import annotations
 
@@ -41,8 +47,7 @@ CAMPOS_AREAS = ["sigla", "nome"]
 CAMPOS_RELATORIAS = ["rotulo", "comissao", "despacho", "despachado_em", "relator", "partido", "parecer",
                      "parecer_em", "conclusao"]
 CAMPOS_ENCERRADOS = ["rotulo", "tipo", "ano", "leitura", "encerramento", "motivo"]
-CAMPOS_CONTAGEM = ["ano", "tipo", "projetos"]
-CAMPOS_ASSUNTOS = ["rotulo", "assuntos"]
+CAMPOS_HOMENAGENS = ["rotulo"]
 CAMPOS_AUTORES = ["rotulo", "leitura", "ordem", "autor_codigo", "autor"]
 CAMPOS_VETOS = ["rotulo", "veto"]
 CAMPOS_FILIACOES = ["vereador", "partido", "inicio", "fim"]
@@ -51,6 +56,13 @@ CAMPOS_CARGOS = ["comissao", "cargo", "vereador", "inicio", "fim"]
 _NOMES_COMISSOES = [("JUSTIÇA", "CCJ"), ("FINANÇAS", "FIN"), ("POLÍTICA URBANA", "URB"), ("ADMINISTRAÇÃO PÚBLICA", "ADM"),
                     ("TRÂNSITO", "ECON"), ("EDUCAÇÃO", "EDUC"), ("SAÚDE", "SAUDE")]
 _RX_PARTIDO = re.compile(r"\(([^()]+)\)\s*$")
+# Os projetos publicados pelo Pesquisa, na branch gh-pages do repositório (a mesma que o leisp.com.br serve).
+URL_PESQUISA = "https://raw.githubusercontent.com/prototiposlegisla/pesquisa/gh-pages/"
+PRIMEIRO_ANO = 2013
+# Palavras-chave que marcam as homenagens: denominação de logradouros e próprios, datas e eventos
+# do calendário oficial, títulos e outras honrarias.
+HOMENAGENS = {"DENOMINACAO", "CONCESSAO HONORIFICA", "TITULO HONORIFICO", "CIDADAO PAULISTANO", "HOMENAGEM",
+              "DATA COMEMORATIVA", "CALENDARIO OFICIAL DE EVENTOS", "MEDALHA", "SALVA DE PRATA"}
 
 
 def _json(operacao: str) -> list:
@@ -88,12 +100,6 @@ def encerrados(itens: list[dict]) -> list[dict]:
              "motivo": (p.get("motivo") or "").strip()} for p in itens]
 
 
-def assuntos(itens: list[dict]) -> list[dict]:
-    return [{"rotulo": f"{p['tipo']} {p['numero']}/{p['ano']}",
-             "assuntos": " | ".join(dict.fromkeys(a["texto"].strip() for a in p.get("assuntos") or [] if a.get("texto")))}
-            for p in itens if p.get("assuntos")]
-
-
 def autores(itens: list[dict]) -> list[dict]:
     return [{"rotulo": f"{p['tipo']} {p['numero']}/{p['ano']}", "leitura": _data(p.get("leitura")), "ordem": str(k),
              "autor_codigo": str(a.get("chave") or ""), "autor": (a.get("nome") or "").strip()}
@@ -103,6 +109,27 @@ def autores(itens: list[dict]) -> list[dict]:
 def vetos(itens: list[dict]) -> list[dict]:
     return [{"rotulo": f"{p['tipo']} {p['numero']}/{p['ano']}", "veto": ((p.get("veto") or {}).get("nome") or "").strip()}
             for p in itens if p.get("tipo") in TIPOS]
+
+
+def homenagens(camadas: list[dict]) -> list[dict]:
+    """Projetos que são homenagens, a partir das camadas do Pesquisa ({"columns": [...], "data": [...]})."""
+    saida = set()
+    for camada in camadas:
+        col = {c: k for k, c in enumerate(camada["columns"])}
+        for linha in camada["data"]:
+            tipo, ano = linha[col["tipo"]], int(linha[col["ano"]])
+            if tipo in TIPOS and ano >= PRIMEIRO_ANO and set(linha[col["palavras-chave"]].split(" | ")) & HOMENAGENS:
+                saida.add(f"{tipo} {linha[col['numero']]}/{ano}")
+    return [{"rotulo": r} for r in sorted(saida)]
+
+
+def camadas_do_pesquisa() -> list[dict]:
+    versao = json.loads(fontes.baixar_json(URL_PESQUISA + "dados/projetos/version.json"))
+    camadas = []
+    for info in versao["camadas"].values():
+        if max(int(a) for a in str(info["anos"]).split("-")) >= PRIMEIRO_ANO:
+            camadas.append(json.loads(fontes.baixar_json(URL_PESQUISA + info["arquivo"])))
+    return camadas
 
 
 def vereadores(itens: list[dict]) -> tuple[list[dict], list[dict]]:
@@ -141,7 +168,6 @@ def main(argv: list[str] | None = None) -> int:
     args = ap.parse_args(argv)
     atual = datetime.now(C.FUSO).year
     anos = list(range(args.desde or atual - 7, atual + 1))
-    anos_contagem = anos if args.desde else anos[-2:]
 
     areas = sorted(({"sigla": a["sigla"], "nome": a["nome"].strip()} for a in _json("AreasDeTramitacaoJSON")),
                    key=lambda a: a["sigla"])
@@ -154,25 +180,24 @@ def main(argv: list[str] | None = None) -> int:
                sorted(cargos, key=lambda c: (c["comissao"], c["inicio"], c["cargo"], c["vereador"])))
     log(f"vereadores: {len(filiacoes)} filiações, {len(cargos)} cargos nas comissões")
 
-    rel, enc, cont, ass, aut = [], [], [], [], []
+    try:
+        hom = homenagens(camadas_do_pesquisa())
+        gravar_csv(C.DIR_DADOS / "homenagens.csv", CAMPOS_HOMENAGENS, hom)
+        log(f"homenagens.csv: {len(hom)} projetos, pelas palavras-chave do Pesquisa")
+    except Exception as e:  # o Pesquisa fora do ar não pode derrubar o resto
+        log(f"homenagens: não foi possível ler o Pesquisa ({e}); o arquivo anterior fica como está")
+
+    rel, enc, aut = [], [], []
     for ano in anos:
         for tipo in TIPOS:
             rel += relatorias(_json(f"ProjetosReunioesDeComissaoJSON?ano={ano}&tipo={tipo}"))
-            ass += assuntos(_json(f"ProjetosAssuntosJSON?ano={ano}&tipo={tipo}"))
             aut += autores(_json(f"ProjetosAutoresJSON?ano={ano}&tipo={tipo}&numero="))
         enc += [e for e in encerrados(_json(f"ProjetosEncerradosJSON?ano={ano}")) if e["tipo"] in TIPOS]
-        if ano in anos_contagem:
-            por_tipo: dict[str, int] = {}
-            for p in _json(f"ProjetosPorAnoJSON?Ano={ano}"):
-                if p.get("tipo") in TIPOS:
-                    por_tipo[p["tipo"]] = por_tipo.get(p["tipo"], 0) + 1
-            cont += [{"ano": str(ano), "tipo": t, "projetos": str(por_tipo.get(t, 0))} for t in TIPOS]
         log(f"{ano}: {len(rel)} relatorias e {len(enc)} encerrados até aqui")
 
     feitos = set(anos)
     _refazer(C.DIR_DADOS / "relatorias.csv", CAMPOS_RELATORIAS, rel, feitos, lambda l: _ano(l["rotulo"]))
     _refazer(C.DIR_DADOS / "encerrados.csv", CAMPOS_ENCERRADOS, enc, feitos, lambda l: int(l["ano"]))
-    _refazer(C.DIR_DADOS / "assuntos.csv", CAMPOS_ASSUNTOS, ass, feitos, lambda l: _ano(l["rotulo"]))
     _refazer(C.DIR_DADOS / "autores.csv", CAMPOS_AUTORES, aut, feitos, lambda l: _ano(l["rotulo"]))
 
     # Vetos: a consulta é por autor, com os projetos de todos os anos; ficam só os dos anos refeitos.
@@ -184,7 +209,6 @@ def main(argv: list[str] | None = None) -> int:
                 vet[v["rotulo"]] = v
     log(f"vetos: {len(codigos)} autores consultados")
     _refazer(C.DIR_DADOS / "vetos.csv", CAMPOS_VETOS, list(vet.values()), feitos, lambda l: _ano(l["rotulo"]))
-    _refazer(C.DIR_DADOS / "projetos_por_ano.csv", CAMPOS_CONTAGEM, cont, set(anos_contagem), lambda l: int(l["ano"]))
     return 0
 
 
