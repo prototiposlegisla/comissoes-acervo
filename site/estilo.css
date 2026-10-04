@@ -149,7 +149,9 @@ h1 { margin: 4px 0 8px; font-size: clamp(28px, 4vw, 40px); line-height: 1.15; le
 .tabela tbody td { font-variant-numeric: tabular-nums; border-bottom: 1px solid var(--grade); }
 
 /* textos */
-.sobre { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 32px; }
+.sobre { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 20px; margin-top: 8px; }
+#metodologia { grid-column: 1 / -1; }  /* a lista de passos ocupa a largura toda; as outras duas seções ficam lado a lado */
+#metodologia .passos { max-width: 90ch; }
 .sobre section { background: var(--superficie); border: 1px solid var(--borda); border-radius: 12px; padding: 18px; }
 .sobre h2 { margin: 0 0 8px; font-size: 18px; }
 .sobre p, .sobre li { color: var(--tinta-2); font-size: 15px; }
@@ -175,8 +177,8 @@ h1 { margin: 4px 0 8px; font-size: clamp(28px, 4vw, 40px); line-height: 1.15; le
 .abas button[aria-selected="true"] { color: #fff; background: var(--aba-ativa); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25); cursor: default; }
 .abas button[aria-selected="true"] .aba-sub { color: rgba(255, 255, 255, 0.85); }
 @media (max-width: 600px) {
-  .abas { display: flex; width: 100%; }
-  .abas button { flex: 1 1 0; padding: 8px 10px 7px; }
+  .abas { display: grid; grid-template-columns: 1fr 1fr; width: 100%; }  /* quatro abas: duas por linha */
+  .abas button { padding: 8px 10px 7px; }
   .abas .aba-titulo { font-size: 16px; }
 }
 .abas button:focus-visible, .alternador button:focus-visible, .barra-linha:focus-visible,

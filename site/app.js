@@ -2561,7 +2561,7 @@ function mostrarErro(texto) {
   caixa.hidden = !texto;
 }
 
-const ABAS = ["retrato", "evolucao", "trajetorias"];
+const ABAS = ["retrato", "evolucao", "trajetorias", "metodologia"];
 
 function mostrarAba() {
   for (const aba of ABAS) {
@@ -2572,6 +2572,10 @@ function mostrarAba() {
   document.getElementById("filtro-periodo").hidden = !comPeriodo;
   document.getElementById("periodo-livre").hidden = !comPeriodo || estado.periodo !== "livre";
   document.getElementById("f-grupo").closest("label").hidden = estado.aba === "trajetorias";  // só projetos
+  // Metodologia e dados é texto: sem filtros nem números do dia
+  const texto = estado.aba === "metodologia";
+  for (const id of ["kpis", "nome-comissao"]) document.getElementById(id).hidden = texto;
+  document.querySelector(".filtros").hidden = texto;
   document.querySelector('.atalhos a[data-aba="retrato"]').hidden = estado.aba !== "retrato";  // "Por autor" é do retrato
 }
 
@@ -2610,7 +2614,7 @@ async function render() {
   mostrarAba();
   if (estado.aba === "retrato") renderRetrato();
   else if (estado.aba === "evolucao") renderEvolucao(j, serie, fluxos, tramitacao, legislativo);
-  else {
+  else if (estado.aba === "trajetorias") {
     // A aba guarda o próprio estado; o painel passa o filtro de comissão e recebe o que for escolhido lá.
     await Trajetorias.mostrar(estado.comissao, {
       comissao(sigla) { estado.comissao = sigla; sincronizar(); render(); },
@@ -3377,7 +3381,7 @@ function iniciar() {
     render();
     document.getElementById(`aba-${estado.aba}`).focus();
   });
-  // Atalhos do topo: "Por autor" fica na aba do retrato; os demais, no fim da página.
+  // Atalho do topo: "Por autor" fica na aba do retrato.
   for (const a of document.querySelectorAll(".atalhos a")) {
     a.addEventListener("click", async (ev) => {
       ev.preventDefault();

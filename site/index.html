@@ -28,11 +28,10 @@
       <button type="button" role="tab" id="aba-retrato" aria-controls="painel-retrato" aria-selected="true"><span class="aba-titulo">Retrato do dia</span><span class="aba-sub">o acervo de hoje, matéria a matéria</span></button>
       <button type="button" role="tab" id="aba-evolucao" aria-controls="painel-evolucao" aria-selected="false"><span class="aba-titulo">Evolução</span><span class="aba-sub">o que mudou desde 2018</span></button>
       <button type="button" role="tab" id="aba-trajetorias" aria-controls="painel-trajetorias" aria-selected="false"><span class="aba-titulo">Trajetórias</span><span class="aba-sub">o caminho de cada projeto</span></button>
+      <button type="button" role="tab" id="aba-metodologia" aria-controls="painel-metodologia" aria-selected="false"><span class="aba-titulo">Metodologia e dados</span><span class="aba-sub">de onde vêm os números</span></button>
     </div>
     <nav class="atalhos" aria-label="Seções">
       <a href="#por-autor" data-aba="retrato">Por autor</a>
-      <a href="#metodologia">Metodologia</a>
-      <a href="#sobre-os-dados">Sobre os dados</a>
     </nav>
   </div>
 
@@ -605,36 +604,37 @@
       </div>
     </figure>
     </div>
-  </main>
 
-  <div class="sobre">
-    <section id="metodologia">
-      <p class="sobretitulo">Metodologia</p>
-      <h2>Como o acervo é tratado</h2>
-      <ol class="passos">
-        <li><strong>Consulta pública.</strong> Três vezes por dia, um robô lê o relatório <a href="https://splegisconsulta.saopaulo.sp.leg.br/Relatorio/IndexComissaoProjetoTramitacaoInterna" target="_blank" rel="noopener">Projetos em Análise nas Comissões</a> do SPLEGIS, com todas as matérias das sete comissões.</li>
-        <li><strong>Normalização.</strong> Cada matéria vira uma linha com a tramitação externa (data, origem, recebimento) e a interna (data, área e estado) separadas, o relator e os autores, com os prefeitos agrupados em Executivo e as composições da Mesa em Mesa Diretora.</li>
-        <li><strong>Indicadores.</strong> A idade conta dias completos desde o recebimento pela comissão (ou desde a entrada no estado atual), nas faixas de até 30, 31 a 90, 91 a 180, 181 a 365 e mais de 365 dias. Matérias enviadas e ainda não recebidas fazem parte do acervo, como no relatório.</li>
-        <li><strong>Etapas.</strong> O último passo interno de cada matéria indica em que etapa ela está: sem relator, em estudo, em diligência, na pauta ou votada. Antes da coleta diária, é assim que se estima quantas estavam sem relator.</li>
-        <li><strong>Composição.</strong> A legislatura de apresentação sai do ano no número da matéria (o PL 502/2026 é da legislatura 2025–2028). A autoria é a do primeiro autor; os prefeitos são reconhecidos pelo código de autor no SPLEGIS, diferente do que a mesma pessoa tinha como vereador.</li>
-        <li><strong>Relatores e desfechos.</strong> O relator, o parecer e a conclusão de cada projeto em cada comissão, como o projeto terminou (lei, veto, retirada, arquivamento), os autores e os assuntos de cada projeto, os presidentes e membros das comissões e as filiações partidárias dos vereadores vêm do webservice do SPLEGIS, coletados uma vez por dia.</li>
-        <li><strong>Votações e tempos.</strong> A votação de uma matéria numa comissão é o primeiro passo interno de matéria votada, ou a saída aprovada em reunião conjunta. O tempo de cada etapa vai de um passo ao primeiro passo da etapa seguinte. Desde o início da coleta diária, os passos internos também vêm do feed do SPLEGIS.</li>
-        <li><strong>Entradas e saídas.</strong> Cada passagem de uma matéria por uma comissão vai do envio a ela até o envio para outra área, com a origem e o destino. Desde o início da coleta diária, a hora e o destino de cada saída vêm das tramitações que o SPLEGIS registra no dia.</li>
-        <li><strong>Série histórica.</strong> Cada retrato fica guardado. O período de novembro de 2018 a outubro de 2026 foi reconstruído a partir dos eventos de tramitação que o SPLEGIS registra dia a dia e conferido contra o histórico oficial das matérias (<a href="https://github.com/prototiposlegisla/comissoes-acervo/blob/main/dados/reconstrucao/README.md">método e validação</a>).</li>
-      </ol>
-    </section>
-    <section id="sobre-os-dados">
-      <p class="sobretitulo">Sobre os dados</p>
-      <h2>Fonte e atualização</h2>
-      <p>A fonte é o relatório oficial do SPLEGIS, consultado às 10h, às 15h e às 21h47 (horário de Brasília). Cada dia mostra o acervo da última consulta; se a da noite atrasar para a madrugada, ela ainda vale para o dia anterior. A identificação de relator só existe nos retratos diários, desde 2 de outubro de 2026.</p>
-      <p class="links"><a href="https://splegisconsulta.saopaulo.sp.leg.br/Relatorio/IndexComissaoProjetoTramitacaoInterna" target="_blank" rel="noopener">Abrir relatório de origem ↗</a> <a href="https://splegisws.saopaulo.sp.leg.br/ws/ws2.asmx" target="_blank" rel="noopener">Serviços de integração ↗</a></p>
-    </section>
-    <section>
-      <p class="sobretitulo">Dados abertos</p>
-      <h2>Código e dados</h2>
-      <p>Todos os números estão no <a href="https://github.com/prototiposlegisla/comissoes-acervo">repositório no GitHub</a>, em CSV: o retrato de cada dia, o histórico em intervalos e a série reconstruída. O código é aberto, sob a licença MIT.</p>
-    </section>
-  </div>
+    <div id="painel-metodologia" class="sobre" role="tabpanel" aria-labelledby="aba-metodologia" hidden>
+      <section id="metodologia">
+        <p class="sobretitulo">Metodologia</p>
+        <h2>Como o acervo é tratado</h2>
+        <ol class="passos">
+          <li><strong>Consulta pública.</strong> Três vezes por dia, um robô lê o relatório <a href="https://splegisconsulta.saopaulo.sp.leg.br/Relatorio/IndexComissaoProjetoTramitacaoInterna" target="_blank" rel="noopener">Projetos em Análise nas Comissões</a> do SPLEGIS, com todas as matérias das sete comissões.</li>
+          <li><strong>Normalização.</strong> Cada matéria vira uma linha com a tramitação externa (data, origem, recebimento) e a interna (data, área e estado) separadas, o relator e os autores, com os prefeitos agrupados em Executivo e as composições da Mesa em Mesa Diretora.</li>
+          <li><strong>Indicadores.</strong> A idade conta dias completos desde o recebimento pela comissão (ou desde a entrada no estado atual), nas faixas de até 30, 31 a 90, 91 a 180, 181 a 365 e mais de 365 dias. Matérias enviadas e ainda não recebidas fazem parte do acervo, como no relatório.</li>
+          <li><strong>Etapas.</strong> O último passo interno de cada matéria indica em que etapa ela está: sem relator, em estudo, em diligência, na pauta ou votada. Antes da coleta diária, é assim que se estima quantas estavam sem relator.</li>
+          <li><strong>Composição.</strong> A legislatura de apresentação sai do ano no número da matéria (o PL 502/2026 é da legislatura 2025–2028). A autoria é a do primeiro autor; os prefeitos são reconhecidos pelo código de autor no SPLEGIS, diferente do que a mesma pessoa tinha como vereador.</li>
+          <li><strong>Relatores e desfechos.</strong> O relator, o parecer e a conclusão de cada projeto em cada comissão, como o projeto terminou (lei, veto, retirada, arquivamento), os autores e os assuntos de cada projeto, os presidentes e membros das comissões e as filiações partidárias dos vereadores vêm do webservice do SPLEGIS, coletados uma vez por dia.</li>
+          <li><strong>Votações e tempos.</strong> A votação de uma matéria numa comissão é o primeiro passo interno de matéria votada, ou a saída aprovada em reunião conjunta. O tempo de cada etapa vai de um passo ao primeiro passo da etapa seguinte. Desde o início da coleta diária, os passos internos também vêm do feed do SPLEGIS.</li>
+          <li><strong>Entradas e saídas.</strong> Cada passagem de uma matéria por uma comissão vai do envio a ela até o envio para outra área, com a origem e o destino. Desde o início da coleta diária, a hora e o destino de cada saída vêm das tramitações que o SPLEGIS registra no dia.</li>
+          <li><strong>Trajetórias.</strong> A trajetória de cada projeto junta as passagens pelas comissões, a área para onde ele foi enviado ao sair de cada uma (o último envio conhecido, até chegar à comissão seguinte ou ao desfecho) e o desfecho do cadastro de projetos encerrados. A fase dentro da comissão é a etapa do último passo interno.</li>
+          <li><strong>Série histórica.</strong> Cada retrato fica guardado. O período de novembro de 2018 a outubro de 2026 foi reconstruído a partir dos eventos de tramitação que o SPLEGIS registra dia a dia e conferido contra o histórico oficial das matérias (<a href="https://github.com/prototiposlegisla/comissoes-acervo/blob/main/dados/reconstrucao/README.md">método e validação</a>).</li>
+        </ol>
+      </section>
+      <section id="sobre-os-dados">
+        <p class="sobretitulo">Sobre os dados</p>
+        <h2>Fonte e atualização</h2>
+        <p>A fonte é o relatório oficial do SPLEGIS, consultado às 10h, às 15h e às 21h47 (horário de Brasília). Cada dia mostra o acervo da última consulta; se a da noite atrasar para a madrugada, ela ainda vale para o dia anterior. A identificação de relator só existe nos retratos diários, desde 2 de outubro de 2026.</p>
+        <p class="links"><a href="https://splegisconsulta.saopaulo.sp.leg.br/Relatorio/IndexComissaoProjetoTramitacaoInterna" target="_blank" rel="noopener">Abrir relatório de origem ↗</a> <a href="https://splegisws.saopaulo.sp.leg.br/ws/ws2.asmx" target="_blank" rel="noopener">Serviços de integração ↗</a></p>
+      </section>
+      <section>
+        <p class="sobretitulo">Dados abertos</p>
+        <h2>Código e dados</h2>
+        <p>Todos os números estão no <a href="https://github.com/prototiposlegisla/comissoes-acervo">repositório no GitHub</a>, em CSV: o retrato de cada dia, o histórico em intervalos e a série reconstruída. O código é aberto, sob a licença MIT.</p>
+      </section>
+    </div>
+  </main>
 
   <footer class="rodape">
     <p>Fonte: <a href="https://splegisconsulta.saopaulo.sp.leg.br/" target="_blank" rel="noopener">SPLEGIS Consulta</a> · Câmara Municipal de São Paulo. Código e dados no <a href="https://github.com/prototiposlegisla/comissoes-acervo">GitHub</a>. Gráficos feitos com <a href="https://observablehq.com/plot/">Observable Plot</a>.</p>
