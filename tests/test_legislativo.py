@@ -2,7 +2,7 @@
 """Testes das relatorias, pareceres e desfechos tirados do webservice do SPLEGIS."""
 import unittest
 
-from coletor.legislativo import encerrados, relatorias
+from coletor.legislativo import despachos, encerrados, relatorias
 from painel.legislativo import (autoria_dos_projetos, conclusao, desfecho, desfechos_dos_projetos, funil, membros, montar,
                                 partido_na_data, prazos)
 
@@ -21,6 +21,14 @@ class TestLegislativo(unittest.TestCase):
         self.assertEqual([(l["comissao"], l["relator"], l["partido"], l["parecer"]) for l in linhas],
                          [("CCJ", "RICARDO NUNES", "MDB", "1678/2019"), ("URB", "TONINHO PAIVA", "PL", "")])
         self.assertEqual(linhas[0]["rotulo"], "PL 2/2019")
+
+    def test_despachos_com_e_sem_relator(self):
+        itens = [{"tipo": "PL", "numero": 461, "ano": 2025, "encaminhamentos": [
+            {"sequencia": 1, "data": "2025-04-27T23:59:59", "comissoes": [
+                {"ordem": 1, "nome": "CCJ", "relator": None}, {"ordem": 2, "nome": "ADM", "relator": None},
+                {"ordem": 3, "nome": "CPI", "relator": None}]}]}]
+        self.assertEqual([(l["rotulo"], l["despacho"], l["ordem"], l["comissao"]) for l in despachos(itens)],
+                         [("PL 461/2025", "1", "1", "CCJ"), ("PL 461/2025", "1", "2", "ADM")])
 
     def test_conclusoes_e_desfechos(self):
         self.assertEqual(conclusao("FAVORÁVEL AO SUBSTITUTIVO DA COMISSÃO DE JUSTIÇA"), "favoravel")

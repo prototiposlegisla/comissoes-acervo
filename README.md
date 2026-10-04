@@ -130,6 +130,7 @@ O agendamento do GitHub às vezes atrasa horas (já atrasou seis). Por isso, uma
 | [`dados/`](dados/)                         | Os CSVs, que são o produto principal do projeto. Estão descritos em [Os dados](#os-dados).                                                  |
 | [`reconstrucao/`](reconstrucao/)           | O programa que reconstrói o acervo desde 2018; o resultado fica em [`dados/reconstrucao/`](dados/reconstrucao/).                            |
 | [`painel/`](painel/)                       | O gerador dos JSONs do site.                                                                                                                |
+| [`auditoria/`](auditoria/)                 | As regras que procuram erros de registro no SPLEGIS. O resultado é de uso interno da SGP e fica num repositório privado.                    |
 | [`site/`](site/)                           | O site: `index.html` (a estrutura da página), `app.js` (os gráficos e os filtros), `trajetorias.js` (a aba Trajetórias), `xlsx.js` (o relatório consolidado em Excel) e `estilo.css`.                                           |
 | [`tests/`](tests/)                         | Os testes automáticos.                                                                                                                      |
 | [`.github/workflows/`](.github/workflows/) | Os dois agendamentos: `coleta.yml` e `painel.yml`.                                                                                          |
@@ -148,6 +149,7 @@ Todos os arquivos estão em UTF-8, separados por vírgula. As datas seguem o for
 | [`dados/tramitacoes.csv`](dados/tramitacoes.csv)           | Envios de e para as comissões registrados no feed do SPLEGIS desde o início da coleta diária, com o motivo.                                                         |
 | [`dados/passos_internos.csv`](dados/passos_internos.csv)   | Passos da tramitação interna nas comissões registrados no feed desde o início da coleta diária.                                                                     |
 | [`dados/relatorias.csv`](dados/relatorias.csv)             | Relator, parecer e conclusão de cada projeto (PL, PDL, PR, PLO) apresentado desde 2013 em cada comissão permanente, por despacho.                                   |
+| [`dados/despachos.csv`](dados/despachos.csv)               | Comissões designadas em cada despacho de cada projeto apresentado desde 2013, na ordem, tenham relator ou não.                                                      |
 | [`dados/encerrados.csv`](dados/encerrados.csv)             | Como terminou cada projeto encerrado desde 2013: promulgado, vetado, retirado, arquivado etc.                                                                       |
 | [`dados/eventos.csv`](dados/eventos.csv)                   | Eventos marcados nos gráficos de tempo (como a pandemia): `data`, `texto` curto do marco e `descricao`. Editado à mão.                                              |
 | [`dados/areas.csv`](dados/areas.csv)                       | Nome de cada área de tramitação do SPLEGIS (`SGP21` = Equipe de Apoio ao Plenário etc.).                                                                            |
@@ -193,11 +195,12 @@ O relatório traz todos os tipos de matéria: `PL`, `PDL`, `PR`, `PLO`, `DOCREC`
 - `passos_internos.csv`: `data`, `rotulo`, `tipo` (`interna`, ou `excl_interna` quando o passo foi excluído), `comissao`, `area`, `passo` e `comentario`, como `Relator(a)` / `Estudo para manifestação do relator`. Só os passos nas 7 comissões.
 - Os dois arquivos só acrescentam: cada coleta baixa o feed do dia de referência e do anterior e junta o que faltava. `python -m coletor.tramitacoes --desde AAAA-MM-DD` preenche lacunas.
 
-### `relatorias.csv`, `encerrados.csv`, `areas.csv`, `autores.csv`, `vetos.csv`, `filiacoes.csv` e `cargos_comissoes.csv`
+### `relatorias.csv`, `despachos.csv`, `encerrados.csv`, `areas.csv`, `autores.csv`, `vetos.csv`, `filiacoes.csv` e `cargos_comissoes.csv`
 
-Vêm do [webservice do SPLEGIS](https://splegisws.saopaulo.sp.leg.br/ws/ws2.asmx) (operações `ProjetosReunioesDeComissao`, `ProjetosEncerrados`, `AreasDeTramitacao`, `ProjetosAutores`, `ProjetosVetadosPorPromovente` e `VereadoresCMSP`), por `python -m coletor.legislativo`, uma vez por dia, para os projetos dos últimos oito anos; `--desde 2013` refaz tudo.
+Vêm do [webservice do SPLEGIS](https://splegisws.saopaulo.sp.leg.br/ws/ws2.asmx) (operações `ProjetosReunioesDeComissao`, `ProjetosComissoesDesignadas`, `ProjetosEncerrados`, `AreasDeTramitacao`, `ProjetosAutores`, `ProjetosVetadosPorPromovente` e `VereadoresCMSP`), por `python -m coletor.legislativo`, uma vez por dia, para os projetos dos últimos oito anos; `--desde 2013` refaz tudo.
 
-- `relatorias.csv`: `rotulo`, `comissao`, `despacho` (número do despacho que mandou o projeto às comissões) e `despachado_em`, `relator` e `partido` (o que o SPLEGIS registra hoje para o vereador, que pode não ser o da época; o painel usa o da data do parecer, por `filiacoes.csv`), `parecer` (número/ano), `parecer_em` e `conclusao` (como `FAVORÁVEL`, `LEGALIDADE COM SUBSTITUTIVO`, `CONTRÁRIO`). Não traz a data da designação do relator.
+- `relatorias.csv`: `rotulo`, `comissao`, `despacho` (número do despacho que mandou o projeto às comissões) e `despachado_em`, `relator` e `partido` (o que o SPLEGIS registra hoje para o vereador, que pode não ser o da época; o painel usa o da data do parecer, por `filiacoes.csv`), `parecer` (número/ano), `parecer_em` e `conclusao` (como `FAVORÁVEL`, `LEGALIDADE COM SUBSTITUTIVO`, `CONTRÁRIO`). Não traz a data da designação do relator, e só traz a comissão depois que ela tem relator.
+- `despachos.csv`: `rotulo`, `despacho`, `despachado_em`, `ordem` (posição da comissão no despacho) e `comissao`. Traz todas as comissões designadas, inclusive as que ainda não têm relator.
 - `encerrados.csv`: `rotulo`, `tipo`, `ano`, `leitura`, `encerramento` e `motivo` (`Encerrado-PROMULGADO`, `Encerrado-VETO TOTAL ACEITO`, `Encerrado-TERMINO DE LEGISLATURA (ART. 275 REG. INT.)` etc.).
 - `areas.csv`: `sigla`, `nome`.
 - `autores.csv`: `rotulo`, `leitura`, `ordem` (1 = primeiro autor), `autor_codigo` e `autor`. Os prefeitos são reconhecidos pelo código de autor, como na composição do acervo. Como lista todos os projetos, dá também a contagem de projetos apresentados por ano.
