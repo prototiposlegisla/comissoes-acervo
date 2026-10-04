@@ -30,6 +30,7 @@
     <div class="abas" role="tablist" aria-label="Visões do painel">
       <button type="button" role="tab" id="aba-retrato" aria-controls="painel-retrato" aria-selected="true"><span class="aba-titulo">Retrato do dia</span><span class="aba-sub">o acervo de hoje, matéria a matéria</span></button>
       <button type="button" role="tab" id="aba-evolucao" aria-controls="painel-evolucao" aria-selected="false"><span class="aba-titulo">Evolução</span><span class="aba-sub">o que mudou desde 2018</span></button>
+      <button type="button" role="tab" id="aba-trajetorias" aria-controls="painel-trajetorias" aria-selected="false"><span class="aba-titulo">Trajetórias</span><span class="aba-sub">o caminho de cada projeto</span></button>
     </div>
     <nav class="atalhos" aria-label="Seções">
       <a href="#por-autor" data-aba="retrato">Por autor</a>
@@ -533,6 +534,81 @@
       <div class="rodape-cartao"><div class="acoes acoes-csv"></div></div>
     </figure>
     </div>
+
+    <div id="painel-trajetorias" role="tabpanel" aria-labelledby="aba-trajetorias" hidden>
+    <figure class="cartao tj" id="c-trajetorias">
+      <div class="cartao-topo">
+        <div>
+          <h2>Trajetórias dos projetos pelas comissões</h2>
+          <p class="sub">Cada linha é um projeto (PL, PDL, PR ou PLO) que passou por alguma Comissão Permanente desde outubro de 2018. As faixas são os lugares onde ele esteve, e a linha muda de faixa a cada envio. As linhas são translúcidas: onde a cor fica forte, muitos projetos estiveram no mesmo lugar ao mesmo tempo. O filtro de comissão mostra só os projetos que passaram por ela; os de matérias e de período não se aplicam.</p>
+        </div>
+      </div>
+
+      <div class="tj-controles" aria-label="Opções do gráfico">
+        <div class="tj-grupo"><span>Cor por</span>
+          <div class="alternador" id="tj-cor" role="group" aria-label="Cor por">
+            <button type="button" data-v="desfecho" aria-pressed="true">Desfecho</button><button type="button" data-v="ano" aria-pressed="false">Ano</button><button type="button" data-v="tipo" aria-pressed="false">Tipo</button><button type="button" data-v="fase" aria-pressed="false">Fase na comissão</button>
+          </div></div>
+        <div class="tj-grupo"><span>Eixo horizontal</span>
+          <div class="alternador" id="tj-eixo" role="group" aria-label="Eixo horizontal">
+            <button type="button" data-v="data" aria-pressed="true">Data</button><button type="button" data-v="idade" aria-pressed="false">Tempo desde a 1ª comissão</button>
+          </div></div>
+        <div class="tj-grupo"><span>Lugar na faixa</span>
+          <div class="alternador" id="tj-slot" role="group" aria-label="Lugar na faixa">
+            <button type="button" data-v="entrada" aria-pressed="true">Ordem de chegada</button><button type="button" data-v="acaso" aria-pressed="false">Espalhado</button>
+          </div></div>
+        <div class="tj-grupo"><label for="tj-passou"><span>Passou por</span></label>
+          <select id="tj-passou"></select></div>
+        <div class="tj-grupo"><label for="tj-intensidade"><span>Intensidade</span></label>
+          <input type="range" id="tj-intensidade" min="-2" max="2.5" step="0.25" value="0"></div>
+        <div class="tj-grupo"><label for="tj-busca"><span>Buscar projeto</span></label>
+          <div class="tj-busca"><input id="tj-busca" placeholder="PL 310/2022" autocomplete="off" role="combobox" aria-controls="tj-sugestoes" aria-expanded="false"><ul id="tj-sugestoes" role="listbox" hidden></ul></div></div>
+      </div>
+
+      <div class="tj-controles" aria-label="Filtros por categoria">
+        <div class="tj-grupo"><span>Desfecho</span><div class="tj-chips" id="tj-f-desfecho"></div></div>
+        <div class="tj-grupo"><span>Apresentado em</span><div class="tj-chips" id="tj-f-ano"></div></div>
+        <div class="tj-grupo"><span>Tipo</span><div class="tj-chips" id="tj-f-tipo"></div></div>
+        <div class="tj-grupo" id="tj-g-fase" hidden><span>Fase na comissão · % do tempo nas comissões</span><div class="tj-chips" id="tj-f-fase"></div></div>
+      </div>
+
+      <div class="tj-barra">
+        <span><span id="tj-n">0</span> projetos na tela <button type="button" id="tj-filtro-trans" class="tj-chip-trans" hidden></button> · passe o mouse para identificar, clique para fixar</span>
+        <span>Ctrl + roda do mouse (ou pinça) aproxima; arraste para os lados · <button type="button" class="botao pequeno" id="tj-tudo">Ver período todo</button></span>
+      </div>
+
+      <div class="tj-vis">
+        <div class="tj-coluna">
+          <div class="tj-quadro" id="tj-quadro">
+            <canvas id="tj-fundo"></canvas>
+            <canvas id="tj-linhas"></canvas>
+            <canvas id="tj-sobre"></canvas>
+            <div id="tj-dica" hidden></div>
+          </div>
+          <section class="tj-detalhe" id="tj-detalhe" aria-live="polite">
+            <p class="tj-vazio">Clique numa linha ou busque um projeto para ver a trajetória dele aqui.</p>
+          </section>
+        </div>
+        <section class="tj-mapa" aria-labelledby="tj-mapa-titulo">
+          <svg id="tj-mapa-svg" role="img" aria-labelledby="tj-mapa-titulo"></svg>
+          <div class="tj-mapa-texto">
+            <h3 id="tj-mapa-titulo">Mapa de transições</h3>
+            <p class="tj-mapa-legenda">Cada arco liga duas faixas e é mais grosso quanto mais projetos fizeram aquele envio. À direita do eixo, envios para uma faixa mais abaixo; à esquerda, voltas para uma faixa mais acima. Clique num arco para ver só esses projetos, ou num ponto para ver quem passou por aquela faixa.</p>
+            <p class="tj-mapa-info" id="tj-mapa-info" aria-live="polite">&nbsp;</p>
+            <h4>Envios mais comuns</h4>
+            <ol class="tj-mapa-lista" id="tj-mapa-lista"></ol>
+          </div>
+        </section>
+      </div>
+
+      <div class="nota-grafico tj-notas">
+        <p><strong>De onde vem.</strong> As passagens pelas comissões são as dos gráficos de entradas e saídas: a série reconstruída a partir do feed de eventos do SPLEGIS (desde 26/10/2018) e, a partir de 02/10/2026, as fotos diárias do acervo. O desfecho vem do cadastro de projetos encerrados.</p>
+        <p><strong>Fora das comissões.</strong> Entre uma comissão e outra, ou depois da última, a linha fica na faixa da área para onde o projeto foi enviado (SGP12, Secretaria das Comissões; SGP21, Apoio ao Plenário; SGP23, Finalização do Processo Legislativo; Arquivo). É o último envio conhecido: o que acontece dentro dessas áreas não aparece aqui.</p>
+        <p><strong>Fase na comissão.</strong> Vem do último passo interno registrado, agrupado como nas etapas da tramitação interna: sem relator (ainda sem passo, ou à espera de designação ou redesignação do relator), estudo (com o relator, a Procuradoria ou a Consultoria), diligência (pedido de informação, ofício, audiência), em pauta (relatado, adiado, vista), votado (deliberado, certidão de votação, parecer a publicar) e outro passo. "Sem relator" é uma estimativa: antes da coleta diária, nenhuma fonte registra a falta de relator. Fase desconhecida: o projeto já estava na comissão quando o feed começa e ainda não tinha passo novo.</p>
+        <p><strong>Projetos antigos.</strong> Os que já estavam numa comissão quando o feed começa (out/2018) aparecem a partir dessa data, sem a parte anterior da trajetória.</p>
+      </div>
+    </figure>
+    </div>
   </main>
 
   <div class="sobre">
@@ -593,6 +669,7 @@
 <script src="vendor/d3.min.js"></script>
 <script src="vendor/plot.umd.min.js"></script>
 <script src="xlsx.js?v=dev"></script>
+<script src="trajetorias.js?v=dev"></script>
 <script src="app.js?v=dev"></script>
 </body>
 </html>

@@ -2561,15 +2561,18 @@ function mostrarErro(texto) {
   caixa.hidden = !texto;
 }
 
+const ABAS = ["retrato", "evolucao", "trajetorias"];
+
 function mostrarAba() {
-  const retrato = estado.aba === "retrato";
-  document.getElementById("aba-evolucao").setAttribute("aria-selected", String(!retrato));
-  document.getElementById("aba-retrato").setAttribute("aria-selected", String(retrato));
-  document.getElementById("painel-evolucao").hidden = retrato;
-  document.getElementById("painel-retrato").hidden = !retrato;
-  document.getElementById("filtro-periodo").hidden = retrato;  // o retrato é sempre do último dia
-  document.getElementById("periodo-livre").hidden = retrato || estado.periodo !== "livre";
-  document.querySelector('.atalhos a[data-aba="retrato"]').hidden = !retrato;  // "Por autor" é do retrato
+  for (const aba of ABAS) {
+    document.getElementById(`aba-${aba}`).setAttribute("aria-selected", String(estado.aba === aba));
+    document.getElementById(`painel-${aba}`).hidden = estado.aba !== aba;
+  }
+  const comPeriodo = estado.aba === "evolucao";  // o retrato é sempre do último dia; as trajetórias, o período todo
+  document.getElementById("filtro-periodo").hidden = !comPeriodo;
+  document.getElementById("periodo-livre").hidden = !comPeriodo || estado.periodo !== "livre";
+  document.getElementById("f-grupo").closest("label").hidden = estado.aba === "trajetorias";  // só projetos
+  document.querySelector('.atalhos a[data-aba="retrato"]').hidden = estado.aba !== "retrato";  // "Por autor" é do retrato
 }
 
 async function render() {
@@ -2584,7 +2587,7 @@ async function render() {
     ultimoDiaDados = j.datasObj[j.datasObj.length - 1];
     if (!cache.eventos) cache.eventos = await fetch("dados/eventos.json").then((r) => (r.ok ? r.json() : [])).catch(() => []);
     if (estado.aba === "retrato") await carregarRetrato();
-    else {  // sem estes arquivos, os outros gráficos ainda saem
+    else if (estado.aba === "evolucao") {  // sem estes arquivos, os outros gráficos ainda saem
       [fluxos, tramitacao, legislativo] = await Promise.all([carregarFluxos().catch((e) => e),
         carregarTramitacao().catch((e) => e), carregarLegislativo().catch((e) => e)]);
     }
@@ -2606,7 +2609,13 @@ async function render() {
   renderKpis(j, serie);
   mostrarAba();
   if (estado.aba === "retrato") renderRetrato();
-  else renderEvolucao(j, serie, fluxos, tramitacao, legislativo);
+  else if (estado.aba === "evolucao") renderEvolucao(j, serie, fluxos, tramitacao, legislativo);
+  else {
+    // A aba guarda o próprio estado; o painel passa o filtro de comissão e recebe o que for escolhido lá.
+    await Trajetorias.mostrar(estado.comissao, {
+      comissao(sigla) { estado.comissao = sigla; sincronizar(); render(); },
+    }).catch((e) => mostrarErro(`Erro ao carregar as trajetórias: ${e.message}`));
+  }
 }
 
 // ----------------------------------------------------------------------------- retrato do dia
@@ -3313,7 +3322,7 @@ function lerEndereco() {
   if (valido(GRUPOS, p.get("grupo"))) estado.grupo = p.get("grupo");
   if (valido(PERIODOS, p.get("periodo"))) estado.periodo = p.get("periodo");
   for (const chave of ["de", "ate"]) estado[chave] = /^\d{4}-\d{2}-\d{2}$/.test(p.get(chave) ?? "") ? p.get(chave) : "";
-  if (["evolucao", "retrato"].includes(p.get("aba"))) estado.aba = p.get("aba");
+  if (ABAS.includes(p.get("aba"))) estado.aba = p.get("aba");
 }
 
 function sincronizar() {
@@ -3326,7 +3335,7 @@ function sincronizar() {
   document.getElementById("f-periodo").value = estado.periodo;
   document.getElementById("f-de").value = estado.de;
   document.getElementById("f-ate").value = estado.ate;
-  document.getElementById("periodo-livre").hidden = estado.aba === "retrato" || estado.periodo !== "livre";
+  document.getElementById("periodo-livre").hidden = estado.aba !== "evolucao" || estado.periodo !== "livre";
   history.replaceState(null, "", `#${new URLSearchParams(Object.entries(estado).filter(([, v]) => v))}`);
 }
 
@@ -3362,7 +3371,7 @@ function iniciar() {
       render();
     });
   }
-  for (const aba of ["evolucao", "retrato"]) {
+  for (const aba of ABAS) {
     document.getElementById(`aba-${aba}`).addEventListener("click", () => {
       estado.aba = aba;
       sincronizar();
@@ -3371,7 +3380,8 @@ function iniciar() {
   }
   document.querySelector(".abas").addEventListener("keydown", (ev) => {
     if (ev.key !== "ArrowLeft" && ev.key !== "ArrowRight") return;
-    estado.aba = estado.aba === "evolucao" ? "retrato" : "evolucao";
+    const passo = ev.key === "ArrowRight" ? 1 : ABAS.length - 1;
+    estado.aba = ABAS[(ABAS.indexOf(estado.aba) + passo) % ABAS.length];
     sincronizar();
     render();
     document.getElementById(`aba-${estado.aba}`).focus();

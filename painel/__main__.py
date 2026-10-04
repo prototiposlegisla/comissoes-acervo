@@ -11,7 +11,8 @@ uma lista de datas e, para cada comissão (e TODAS), uma lista por métrica. Gra
 o retrato do dia (retrato.json), matéria a matéria, para as visões do retrato atual; as
 passagens das matérias pelas comissões (fluxos.json), para os gráficos de entradas e
 saídas, permanência e rotas (ver fluxos.py); e as votações por mês e o tempo de cada
-etapa (tramitacao.json, ver etapas.py).
+etapa (tramitacao.json, ver etapas.py); e a trajetória de cada projeto pelas comissões, com
+a fase interna em cada trecho e o desfecho (trajetorias.json, ver trajetorias.py).
 
 Uso (da raiz do repositório):  python -m painel
 """
@@ -24,7 +25,7 @@ from datetime import datetime
 
 from coletor import config as C
 from coletor.util import ler_csv, log
-from painel import composicao, etapas, fluxos, legislativo, retrato
+from painel import composicao, etapas, fluxos, legislativo, retrato, trajetorias
 from reconstrucao import serie as S
 
 SAIDA = C.RAIZ / "site" / "dados"
@@ -124,6 +125,17 @@ def main() -> int:
     arquivo = SAIDA / "tramitacao.json"
     arquivo.write_text(json.dumps(conteudo, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     log(f"{arquivo.name}: {len(conteudo['meses'])} meses, {arquivo.stat().st_size / 1e3:.0f} kB")
+
+    materias_rec = ler_csv(C.DIR_DADOS / "reconstrucao" / "materias.csv")
+    materias = ler_csv(C.ARQ_MATERIAS)
+    conteudo = trajetorias.montar(
+        lista, ler_csv(C.DIR_DADOS / "encerrados.csv"), passos, trajetorias.catalogo(materias_rec, materias),
+        trajetorias.primeiros_autores(ler_csv(C.DIR_DADOS / "reconstrucao" / "autorias.csv"), ler_csv(C.ARQ_AUTORIAS),
+                                      materias),
+        max(c["data"] for c in coletas), ultima["coletado_em"], nomes_areas)
+    arquivo = SAIDA / "trajetorias.json"
+    arquivo.write_text(json.dumps(conteudo, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    log(f"{arquivo.name}: {len(conteudo['projetos']['rotulo'])} projetos, {arquivo.stat().st_size / 1e6:.1f} MB")
 
     conteudo = legislativo.montar(ler_csv(C.DIR_DADOS / "relatorias.csv"), ler_csv(C.DIR_DADOS / "encerrados.csv"),
                                   ler_csv(C.DIR_DADOS / "projetos_por_ano.csv"), max(c["data"] for c in coletas),
