@@ -76,7 +76,9 @@ def _dt(v: str | None) -> datetime | None:
 def _br(d: datetime | date | None, hora: bool = False) -> str:
     if d is None:
         return "?"
-    return d.strftime("%d/%m/%Y %H:%M" if hora and isinstance(d, datetime) else "%d/%m/%Y")
+    # Sem strftime: no Linux, %Y não completa anos de 3 dígitos com zero (0201 sai 201).
+    texto = f"{d.day:02d}/{d.month:02d}/{d.year:04d}"
+    return f"{texto} {d.hour:02d}:{d.minute:02d}" if hora and isinstance(d, datetime) else texto
 
 
 def _ano(rotulo: str) -> int:
