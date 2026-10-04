@@ -4,7 +4,7 @@ O acervo das 7 Comissões Permanentes dia a dia, de 01/11/2018 até o início da
 
 É uma reconstrução, com três diferenças em relação aos retratos reais:
 
-- **Sem relator.** Nenhuma fonte pública do SPLEGIS registra quem foi designado relator no passado, só quem é o relator hoje.
+- **Sem relator.** O webservice do SPLEGIS diz quem foi o relator de cada projeto em cada comissão desde 2013 (ver [`dados/relatorias.csv`](../relatorias.csv)), mas não a data em que ele foi designado; e, para as matérias que não são projetos, nem isso. Sem a data, não dá para saber quais matérias estavam sem relator em cada dia. A série estima esse número pelo passo interno vigente (coluna `etapa_sem_relator`).
 - **Valores desconhecidos aparecem como `?`.** São dados de matérias que já estavam numa comissão quando o feed começou e que o histórico oficial da matéria não permitiu completar, sobretudo documentos recebidos (DOCREC) antigos, que não têm histórico.
 - **Passos internos ficam na data em que foram lançados.** Quando um passo é lançado depois com data retroativa, o feed o registra na data do lançamento, enquanto o retrato mostra a data retroativa.
 
