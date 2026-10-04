@@ -32,68 +32,6 @@
   --trilho-abas: #ebeae4;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:where(:not([data-theme="light"])) {
-    color-scheme: dark;
-    --plano: #0d0d0d;
-    --superficie: #1a1a19;
-    --tinta: #ffffff;
-    --tinta-2: #c3c2b7;
-    --tinta-3: #898781;
-    --grade: #2c2c2a;
-    --base: #383835;
-    --borda: rgba(255, 255, 255, 0.10);
-    --realce: rgba(255, 255, 255, 0.05);
-    --s1: #3987e5;
-    --s2: #d95926;
-    --s3: #199e70;
-    --s4: #c98500;
-    --s5: #d55181;
-    --s6: #008300;
-    --s7: #9085e9;
-    /* no escuro a rampa inverte: mais velha = mais clara */
-    --idade-1: #184f95;
-    --idade-2: #256abf;
-    --idade-3: #3987e5;
-    --idade-4: #6da7ec;
-    --idade-5: #9ec5f4;
-    --cinza-1: #898781;
-    --cinza-2: #52514e;
-    --sombra: 0 4px 16px rgba(0, 0, 0, 0.5);
-    --aba-ativa: #256abf;
-    --trilho-abas: #252524;
-  }
-}
-
-:root[data-theme="dark"] {
-  color-scheme: dark;
-  --plano: #0d0d0d;
-  --superficie: #1a1a19;
-  --tinta: #ffffff;
-  --tinta-2: #c3c2b7;
-  --tinta-3: #898781;
-  --grade: #2c2c2a;
-  --base: #383835;
-  --borda: rgba(255, 255, 255, 0.10);
-  --realce: rgba(255, 255, 255, 0.05);
-  --s1: #3987e5;
-  --s2: #d95926;
-  --s3: #199e70;
-  --s4: #c98500;
-  --s5: #d55181;
-  --s6: #008300;
-  --s7: #9085e9;
-  --idade-1: #184f95;
-  --idade-2: #256abf;
-  --idade-3: #3987e5;
-  --idade-4: #6da7ec;
-  --idade-5: #9ec5f4;
-  --cinza-1: #898781;
-  --cinza-2: #52514e;
-  --sombra: 0 4px 16px rgba(0, 0, 0, 0.5);
-  --aba-ativa: #256abf;
-  --trilho-abas: #252524;
-}
 
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }  /* vale também para elementos com display definido aqui */
@@ -136,7 +74,6 @@ h1 { margin: 4px 0 8px; font-size: clamp(28px, 4vw, 40px); line-height: 1.15; le
   outline: 2px solid var(--s1); outline-offset: 2px; }
 .botao { cursor: pointer; }
 .botao:hover { background: var(--realce); }
-.filtros .tema { margin-left: auto; }
 
 /* números do último dia */
 .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin: 16px 0 24px; }
@@ -224,11 +161,10 @@ h1 { margin: 4px 0 8px; font-size: clamp(28px, 4vw, 40px); line-height: 1.15; le
 @media (max-width: 600px) {
   .filtros { position: static; }
   .filtros label { flex: 1 1 140px; }
-  .filtros .tema { margin-left: 0; }
   .cartao { padding: 14px 12px 10px; }
 }
 
-/* abas: um seletor de dois lados, como um interruptor; o lado ativo fica preenchido */
+/* abas: um seletor de lados, como um interruptor; o lado ativo fica preenchido */
 .abas { display: inline-flex; gap: 4px; padding: 4px; margin-bottom: 10px; background: var(--trilho-abas);
   border: 1px solid var(--borda); border-radius: 14px; }
 .abas button { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; font: inherit; text-align: left;

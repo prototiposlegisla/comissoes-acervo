@@ -25,7 +25,7 @@ const GRUPOS = [
 ];
 const LEGISLATURAS = ["2021-01-01", "2025-01-01"];
 
-// Empilhamentos: da base para o topo. As cores são variáveis do CSS (claro e escuro).
+// Empilhamentos: da base para o topo. As cores são variáveis do CSS.
 const IDADE = [
   { campos: ["idade_mais365"], nome: "Mais de 1 ano", cor: "--idade-5" },
   { campos: ["idade_181a365"], nome: "181 a 365 dias", cor: "--idade-4" },
@@ -3305,7 +3305,7 @@ function iniciarRetrato() {
   });
 }
 
-// ----------------------------------------------------------------------------- filtros, tema e endereço
+// ----------------------------------------------------------------------------- filtros e endereço
 function preencher(select, opcoes, valor) {
   select.replaceChildren(...opcoes.map(([v, t]) => {
     const o = el("option", null, t);
@@ -3337,15 +3337,6 @@ function sincronizar() {
   document.getElementById("f-ate").value = estado.ate;
   document.getElementById("periodo-livre").hidden = estado.aba !== "evolucao" || estado.periodo !== "livre";
   history.replaceState(null, "", `#${new URLSearchParams(Object.entries(estado).filter(([, v]) => v))}`);
-}
-
-const TEMAS = [["", "Tema: automático"], ["light", "Tema: claro"], ["dark", "Tema: escuro"]];
-
-function aplicarTema(tema) {
-  if (tema) document.documentElement.dataset.theme = tema;
-  else delete document.documentElement.dataset.theme;
-  try { tema ? localStorage.setItem("tema", tema) : localStorage.removeItem("tema"); } catch (e) { /* sem armazenamento */ }
-  document.getElementById("tema").textContent = TEMAS.find(([t]) => t === tema)[1];
 }
 
 function iniciar() {
@@ -3399,14 +3390,6 @@ function iniciar() {
     });
   }
   iniciarRetrato();
-  aplicarTema(document.documentElement.dataset.theme || "");
-  document.getElementById("tema").addEventListener("click", () => {
-    const atual = document.documentElement.dataset.theme || "";
-    const i = TEMAS.findIndex(([t]) => t === atual);
-    aplicarTema(TEMAS[(i + 1) % TEMAS.length][0]);
-    render();
-  });
-  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", render);
   window.addEventListener("hashchange", () => { lerEndereco(); sincronizar(); render(); });
   let espera;
   new ResizeObserver(() => {
