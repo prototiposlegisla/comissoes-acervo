@@ -40,14 +40,16 @@ def auditar(d: dict, hoje: datetime) -> list[dict]:
     """Todas as suspeitas de hoje. `d` traz as linhas de cada arquivo de dados/."""
     passos = d["passos_reconstrucao"] + d["passos_internos"]
     registros = R.registros_de_envio(d["presencas"], d["historico"])
+    apensamentos = R.apensamento_nao_efetivado(d["acervo"], d["relatorias"], passos, hoje)
     return [
+        *apensamentos,
         *R.arquivamento_fora_de_fase(d["encerrados"]),
         *R.datas_de_despacho(d["despachos"], d["relatorias"], d["autores"], registros, d["tramitacoes"]),
         *R.datas_de_recebimento(registros),
         *R.pareceres(d["relatorias"]),
         *R.leituras(d["encerrados"], d["autores"]),
         *R.recebida_sem_despacho(d["passagens"], d["despachos"], passos, hoje),
-        *R.votado_e_parado(d["acervo"], hoje),
+        *R.votado_e_parado(d["acervo"], hoje, {(s["rotulo"], s["comissao"]) for s in apensamentos}),
         *R.em_transito(d["acervo"], hoje),
         *R.tramita_depois_de_encerrada(d["encerrados"], d["passagens"], d["relatorias"]),
     ]

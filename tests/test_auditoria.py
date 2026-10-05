@@ -128,6 +128,25 @@ class TestCaminho(unittest.TestCase):
         self.assertEqual(regras(R.votado_e_parado(acervo, HOJE)), ["votado-e-parado"])
         self.assertEqual(regras(R.em_transito(acervo, HOJE)), ["em-transito"])
 
+    def test_apensamento_nao_efetivado(self):
+        def item(rotulo, data):
+            return {"comissao": "CCJ", "rotulo": rotulo, "interna_data": data, "interna_area": "Secretaria (SGP12)",
+                    "interna_tipo": "Deliberado", "enviado_em": "2025-08-13T19:40:00", "recebido_em": "x",
+                    "enviado_por": "PROC-CMSP", "relator": ""}
+        acervo = [item("PL 341/2025", "2025-11-05T14:00:00"),   # pedido de apensamento parado
+                  item("PL 1/2025", "2025-11-05T14:00:00"),     # votou o parecer: não é apensamento
+                  item("PL 2/2025", "2025-11-05T14:00:00"),     # sem pauta citando outro projeto
+                  item("PL 3/2025", "2026-09-16T14:00:00")]     # há menos de 30 dias
+        relatorias = [{"rotulo": "PL 1/2025", "comissao": "CCJ", "parecer_em": "2025-11-05T14:00:00"}]
+        passos = [{"comissao": "CCJ", "rotulo": r, "data": "2025-10-14T16:24:55", "tipo": "interna",
+                   "passo": "Em Condição de Pauta", "comentario": "PL 226/2025 - AUTORES: MARINA BRAGANTE (REDE)"}
+                  for r in ("PL 341/2025", "PL 1/2025", "PL 3/2025")]
+        saida = R.apensamento_nao_efetivado(acervo, relatorias, passos, HOJE)
+        self.assertEqual([s["rotulo"] for s in saida], ["PL 341/2025"])
+        self.assertIn("PL 226/2025", saida[0]["descricao"])
+        parados = R.votado_e_parado(acervo, HOJE, {("PL 341/2025", "CCJ")})
+        self.assertEqual([s["rotulo"] for s in parados], ["PL 1/2025", "PL 2/2025"])
+
     def test_tramita_depois_de_encerrada(self):
         encerrados = [{"rotulo": "PL 36/2015", "encerramento": "2015-05-14T00:00:00", "motivo": "Encerrado-PROMULGADO"},
                       {"rotulo": "PL 108/2013", "encerramento": "2015-06-18T09:29:00", "motivo": "Encerrado-PROMULGADO"},

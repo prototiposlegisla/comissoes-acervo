@@ -51,6 +51,8 @@ REGRAS = {
     "leitura-antes-do-ano": ("media", "Leitura muito anterior ao ano do número do projeto."),
     "recebida-sem-despacho": ("alta", "Comissão recebeu e manteve a matéria sem ter sido despachada a ela."),
     "votado-e-parado": ("media", "Matéria votada na comissão e não enviada adiante há mais de 30 dias."),
+    "apensamento-nao-efetivado": (
+        "media", "Apensamento aprovado na comissão e não efetivado há mais de 30 dias."),
     "em-transito": ("media", "Matéria enviada à comissão e não recebida há mais de 30 dias."),
     "tramita-depois-de-encerrada": ("alta", "Matéria encerrada com tramitação posterior ao encerramento."),
 }
@@ -61,6 +63,9 @@ LIMITE_DIAS = 30  # cerca de 95% dos casos levam menos que isso (feed de 2018 a 
 ANO_MINIMO = 1980
 LIMITE_LEITURA = 180  # diferença normal entre as datas de leitura de dois serviços: até ~4 meses
 _RX_PARECER = re.compile(r"^(\d{1,4})/(\d{4})$")
+# Na pauta de um pedido de apensamento, o comentário do passo começa pelo projeto principal:
+# "PL 553/2025 - AUTOR: ADRILLES JORGE (UNIÃO) - DISPÕE SOBRE ..."
+_RX_PRINCIPAL = re.compile(r"^((?:PL|PDL|PR|PLO) \d+/\d{4}) -")
 
 
 # ----------------------------------------------------------------------------- utilidades
@@ -336,11 +341,43 @@ def recebida_sem_despacho(passagens: list[dict], despachos: list[dict], passos: 
 
 
 # ----------------------------------------------------------------------------- 4. acervo de hoje
-def votado_e_parado(acervo: list[dict], hoje: datetime) -> list[dict]:
+def apensamento_nao_efetivado(acervo: list[dict], relatorias: list[dict], passos: list[dict],
+                              hoje: datetime) -> list[dict]:
+    """Pedido de apensamento aprovado e não efetivado: a matéria está em "Deliberado" sem
+    parecer naquele dia (votou-se o pedido, não o parecer) e a pauta citava o projeto
+    principal. De 2022 a 2026, 88% das matérias da CCJ nessa situação saíram apensadas."""
+    pareceres = {(r["rotulo"], r["comissao"], r["parecer_em"][:10]) for r in relatorias if r["parecer_em"]}
+    principal: dict[tuple, list[tuple]] = defaultdict(list)
+    for p in passos:
+        if p.get("tipo", "interna") == "interna" and (m := _RX_PRINCIPAL.match(p.get("comentario") or "")):
+            principal[(p["comissao"], p["rotulo"])].append((p["data"][:19], m[1]))
     saida = []
     for a in acervo:
         d = _dt(a["interna_data"])
-        if a["interna_tipo"] not in PASSOS_POS_VOTO or d is None or (hoje - d).days <= LIMITE_DIAS:
+        if (a["interna_tipo"] != "Deliberado" or d is None or (hoje - d).days <= LIMITE_DIAS
+                or (a["rotulo"], a["comissao"], a["interna_data"][:10]) in pareceres):
+            continue
+        citados = sorted(c for c in principal.get((a["comissao"], a["rotulo"]), [])
+                         if (a["enviado_em"] or "") <= c[0] <= a["interna_data"][:19])
+        if not citados:
+            continue
+        alvo = citados[-1][1]
+        saida.append(_suspeita(
+            "apensamento-nao-efetivado", a["rotulo"], a["comissao"], f"deliberado em {d:%Y-%m-%d %H:%M}", d,
+            f"Apensamento ao {alvo} aprovado na {a['comissao']} em {_br(d)} e não efetivado há "
+            f"{(hoje - d).days} dias.",
+            f"acervo: passo {a['interna_area']}/Deliberado em {_br(d, True)}, sem parecer nesse dia; "
+            f"pauta: comentário citando o {alvo} em {_br(_dt(citados[-1][0]), True)}"))
+    return saida
+
+
+def votado_e_parado(acervo: list[dict], hoje: datetime, excluir: set | None = None) -> list[dict]:
+    """`excluir`: (rotulo, comissao) já apontados por apensamento_nao_efetivado."""
+    saida = []
+    for a in acervo:
+        d = _dt(a["interna_data"])
+        if (a["interna_tipo"] not in PASSOS_POS_VOTO or d is None or (hoje - d).days <= LIMITE_DIAS
+                or (a["rotulo"], a["comissao"]) in (excluir or set())):
             continue
         saida.append(_suspeita(
             "votado-e-parado", a["rotulo"], a["comissao"], f"passo de {d:%Y-%m-%d %H:%M}", d,
