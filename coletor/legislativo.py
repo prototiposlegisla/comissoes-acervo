@@ -4,9 +4,11 @@ Dados do processo legislativo que o relatório das comissões não traz, tirados
 webservice do SPLEGIS (https://splegisws.saopaulo.sp.leg.br/ws/ws2.asmx):
 
   areas.csv            nome de cada área de tramitação (SGP21 = Equipe de Apoio ao Plenário...)
-  relatorias.csv       relator de cada projeto em cada comissão, com o parecer e a conclusão,
-                       por despacho (ProjetosReunioesDeComissao). Só traz a comissão depois
-                       que ela tem relator.
+  relatorias.csv       relator de cada projeto em cada comissão, com o número do relatório, a
+                       data do parecer e a conclusão, por despacho (ProjetosReunioesDeComissao).
+                       Só traz a comissão depois que ela tem relator. O número do parecer não
+                       vem: o campo "relatorio" é o do relatório do relator, que no quadro de
+                       pareceres da matéria aparece ao lado do parecer, com outro número.
   despachos.csv        comissões designadas em cada despacho, na ordem, tenham relator ou não
                        (ProjetosComissoesDesignadas)
   encerrados.csv       como terminou cada projeto encerrado: lei, veto, arquivamento...
@@ -39,7 +41,7 @@ from reconstrucao import fontes
 URL = "https://splegisws.saopaulo.sp.leg.br/ws/ws2.asmx/"
 TIPOS = ["PL", "PDL", "PR", "PLO"]
 CAMPOS_AREAS = ["sigla", "nome"]
-CAMPOS_RELATORIAS = ["rotulo", "comissao", "despacho", "despachado_em", "relator", "partido", "parecer",
+CAMPOS_RELATORIAS = ["rotulo", "comissao", "despacho", "despachado_em", "relator", "partido", "relatorio",
                      "parecer_em", "conclusao"]
 CAMPOS_DESPACHOS = ["rotulo", "despacho", "despachado_em", "ordem", "comissao"]
 CAMPOS_ENCERRADOS = ["rotulo", "tipo", "ano", "leitura", "encerramento", "motivo"]
@@ -76,7 +78,7 @@ def relatorias(itens: list[dict]) -> list[dict]:
                     "rotulo": rotulo, "comissao": c["nome"], "despacho": str(e.get("sequencia", "")),
                     "despachado_em": _data(e.get("data")), "relator": (c.get("nomePolitico") or "").strip(),
                     "partido": m[1].strip() if m else "",
-                    "parecer": f"{relatorio['numero']}/{relatorio['ano']}" if relatorio.get("numero") else "",
+                    "relatorio": f"{relatorio['numero']}/{relatorio['ano']}" if relatorio.get("numero") else "",
                     "parecer_em": _data(c.get("dataParecer")), "conclusao": (c.get("conclusao") or "").strip(),
                 })
     return linhas

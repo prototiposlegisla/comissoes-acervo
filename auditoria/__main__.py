@@ -46,7 +46,7 @@ def auditar(d: dict, hoje: datetime) -> list[dict]:
         *R.arquivamento_fora_de_fase(d["encerrados"]),
         *R.datas_de_despacho(d["despachos"], d["relatorias"], d["autores"], registros, d["tramitacoes"]),
         *R.datas_de_recebimento(registros),
-        *R.pareceres(d["relatorias"]),
+        *R.relatorios(d["relatorias"]),
         *R.leituras(d["encerrados"], d["autores"]),
         *R.recebida_sem_despacho(d["passagens"], d["despachos"], passos, hoje),
         *R.votado_e_parado(d["acervo"], hoje, {(s["rotulo"], s["comissao"]) for s in apensamentos}),

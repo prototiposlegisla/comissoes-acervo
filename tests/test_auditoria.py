@@ -51,7 +51,7 @@ class TestDatas(unittest.TestCase):
     def test_despacho_depois_do_parecer(self):
         despachos = [{"rotulo": "PL 106/2014", "despacho": "1", "despachado_em": "2015-06-27T00:00:00",
                       "ordem": "1", "comissao": "CCJ"}]
-        relatorias = [{"rotulo": "PL 106/2014", "despacho": "1", "parecer": "1461/2014",
+        relatorias = [{"rotulo": "PL 106/2014", "despacho": "1", "relatorio": "1461/2014",
                        "parecer_em": "2014-10-29T00:00:00"}]
         self.assertEqual(regras(R.datas_de_despacho(despachos, relatorias, [], [], [])),
                          ["despacho-depois-do-parecer"])
@@ -74,11 +74,11 @@ class TestDatas(unittest.TestCase):
              "recebido_em": "2020-01-02T10:00:00"}
         self.assertEqual(len(R.registros_de_envio([p, dict(p)], [dict(p)])), 1)
 
-    def test_pareceres(self):
+    def test_relatorios(self):
         def rel(rotulo, numero, em):
-            return {"rotulo": rotulo, "comissao": "CCJ", "relator": "X", "parecer": numero, "parecer_em": em,
+            return {"rotulo": rotulo, "comissao": "CCJ", "relator": "X", "relatorio": numero, "parecer_em": em,
                     "conclusao": "LEGALIDADE"}
-        saida = R.pareceres([
+        saida = R.relatorios([
             rel("PL 577/2013", "9999/2013", "2013-10-02T00:00:00"),
             rel("PL 650/2013", "572/201", "2014-05-21T00:00:00"),
             rel("PL 495/2015", "1835/2014", "2015-10-07T00:00:00"),
@@ -86,8 +86,8 @@ class TestDatas(unittest.TestCase):
             rel("PL 1/2014", "1115/2014", ""),
             rel("PL 2/2019", "3129/2019", "2020-02-05T00:00:00"),  # votado no ano seguinte: normal
         ])
-        self.assertEqual(regras(saida), ["parecer-numero-invalido", "parecer-numero-invalido",
-                                         "parecer-ano-impossivel", "parecer-ano-impossivel", "parecer-sem-data"])
+        self.assertEqual(regras(saida), ["relatorio-numero-invalido", "relatorio-numero-invalido",
+                                         "relatorio-ano-impossivel", "relatorio-ano-impossivel", "relatorio-sem-data"])
 
     def test_leituras(self):
         autores = [{"rotulo": "PL 644/2018", "leitura": "2018-12-13T00:00:00"},
@@ -152,7 +152,7 @@ class TestCaminho(unittest.TestCase):
                       {"rotulo": "PL 108/2013", "encerramento": "2015-06-18T09:29:00", "motivo": "Encerrado-PROMULGADO"},
                       {"rotulo": "PL 602/2018", "encerramento": "2019-04-17T00:00:00", "motivo": "APENSADO"}]
         relatorias = [{"rotulo": "PL 36/2015", "comissao": "FIN", "despacho": "1", "despachado_em": "2015-02-12T00:00:00",
-                       "parecer": "840/2015", "parecer_em": "2015-05-20T00:00:00"}]
+                       "relatorio": "840/2015", "parecer_em": "2015-05-20T00:00:00"}]
         passagens = [  # enviado do arquivo por engano e devolvido: já corrigido
             {"comissao": "SAUDE", "rotulo": "PL 108/2013", "desde": "2019-01-24T17:08:00", "ate": "2019-01-28T15:18:00",
              "origem": "ARQUIVO", "destino": "ARQUIVO"},

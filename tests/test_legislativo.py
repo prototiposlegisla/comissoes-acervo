@@ -18,7 +18,7 @@ class TestLegislativo(unittest.TestCase):
                 {"nome": "CPI", "relator": "Ver. FULANO (PT)", "nomePolitico": "FULANO"},
                 {"nome": "URB", "relator": "Ver. TONINHO PAIVA (PL)", "nomePolitico": "TONINHO PAIVA"}]}]}]
         linhas = relatorias(itens)
-        self.assertEqual([(l["comissao"], l["relator"], l["partido"], l["parecer"]) for l in linhas],
+        self.assertEqual([(l["comissao"], l["relator"], l["partido"], l["relatorio"]) for l in linhas],
                          [("CCJ", "RICARDO NUNES", "MDB", "1678/2019"), ("URB", "TONINHO PAIVA", "PL", "")])
         self.assertEqual(linhas[0]["rotulo"], "PL 2/2019")
 

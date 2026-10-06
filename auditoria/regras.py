@@ -44,9 +44,10 @@ REGRAS = {
         "media", "Recebimento no mesmo dia e mês do envio, um ano depois (ano trocado?)."),
     "recebimento-dia-mes-trocados": (
         "media", "Recebimento que só faz sentido com o dia e o mês trocados."),
-    "parecer-numero-invalido": ("alta", "Número de parecer fora do formato ou de enchimento."),
-    "parecer-ano-impossivel": ("alta", "Ano do número do parecer incompatível com o projeto ou com a data."),
-    "parecer-sem-data": ("media", "Parecer numerado sem data."),
+    "relatorio-numero-invalido": ("alta", "Número de relatório fora do formato ou de enchimento."),
+    "relatorio-ano-impossivel": (
+        "alta", "Ano do número do relatório incompatível com o projeto ou com a data do parecer."),
+    "relatorio-sem-data": ("media", "Relatório numerado sem data do parecer."),
     "leitura-divergente": ("media", "Data de leitura diferente em dois serviços do SPLEGIS."),
     "leitura-antes-do-ano": ("media", "Leitura muito anterior ao ano do número do projeto."),
     "recebida-sem-despacho": ("alta", "Comissão recebeu e manteve a matéria sem ter sido despachada a ela."),
@@ -62,7 +63,7 @@ PASSOS_POS_VOTO = {"Deliberado", "Assinar Certidão de Votação", "Publicar Par
 LIMITE_DIAS = 30  # cerca de 95% dos casos levam menos que isso (feed de 2018 a 2026)
 ANO_MINIMO = 1980
 LIMITE_LEITURA = 180  # diferença normal entre as datas de leitura de dois serviços: até ~4 meses
-_RX_PARECER = re.compile(r"^(\d{1,4})/(\d{4})$")
+_RX_RELATORIO = re.compile(r"^(\d{1,4})/(\d{4})$")
 # Na pauta de um pedido de apensamento, o comentário do passo começa pelo projeto principal:
 # "PL 553/2025 - AUTOR: ADRILLES JORGE (UNIÃO) - DISPÕE SOBRE ..."
 _RX_PRINCIPAL = re.compile(r"^((?:PL|PDL|PR|PLO) \d+/\d{4}) -")
@@ -175,7 +176,7 @@ def datas_de_despacho(despachos: list[dict], relatorias: list[dict], autores: li
             envios[(t["rotulo"], t["para"])].append(d)
     pareceres: dict[tuple, list[datetime]] = defaultdict(list)
     for r in relatorias:
-        if r["parecer"] and (d := _dt(r["parecer_em"])):
+        if r["relatorio"] and (d := _dt(r["parecer_em"])):
             pareceres[(r["rotulo"], r["despacho"])].append(d)
     leit = _leituras(autores)
 
@@ -252,31 +253,32 @@ def datas_de_recebimento(registros: list[dict]) -> list[dict]:
     return saida
 
 
-def pareceres(relatorias: list[dict]) -> list[dict]:
-    """Número de parecer malformado, de enchimento, com ano impossível ou sem data."""
+def relatorios(relatorias: list[dict]) -> list[dict]:
+    """Número de relatório malformado, de enchimento, com ano impossível ou sem data do parecer.
+    O relatório vem antes do parecer, então o ano do número não pode passar o da data do parecer."""
     saida, vistos = [], set()
     for r in relatorias:
-        numero = r["parecer"]
-        if not numero or (numero, r["rotulo"]) in vistos:  # parecer conjunto: uma suspeita só
+        numero = r["relatorio"]
+        if not numero or (numero, r["rotulo"]) in vistos:  # relatório conjunto: uma suspeita só
             continue
         vistos.add((numero, r["rotulo"]))
         em = _dt(r["parecer_em"])
-        ev = (f"relatorias: parecer {numero} da {r['comissao']}, relator {r['relator']}, "
-              f"de {_br(em)}, \"{r['conclusao']}\"")
-        m = _RX_PARECER.match(numero)
+        ev = (f"relatorias: relatório {numero} da {r['comissao']}, relator {r['relator']}, "
+              f"parecer de {_br(em)}, \"{r['conclusao']}\"")
+        m = _RX_RELATORIO.match(numero)
         if not m or m[1] == "9999":
-            saida.append(_suspeita("parecer-numero-invalido", r["rotulo"], r["comissao"], numero, em,
-                                   f"Parecer com número \"{numero}\".", ev))
+            saida.append(_suspeita("relatorio-numero-invalido", r["rotulo"], r["comissao"], numero, em,
+                                   f"Relatório com número \"{numero}\".", ev))
             continue
         ano_num, ano_proj = int(m[2]), _ano(r["rotulo"])
         if ano_num < ano_proj or (em and ano_num > em.year):
             motivo = (f"anterior ao projeto ({ano_proj})" if ano_num < ano_proj
                       else f"posterior à data do parecer ({_br(em)})")
-            saida.append(_suspeita("parecer-ano-impossivel", r["rotulo"], r["comissao"], numero, em,
-                                   f"Parecer {numero}: o ano do número é {motivo}.", ev))
+            saida.append(_suspeita("relatorio-ano-impossivel", r["rotulo"], r["comissao"], numero, em,
+                                   f"Relatório {numero}: o ano do número é {motivo}.", ev))
         if em is None:
-            saida.append(_suspeita("parecer-sem-data", r["rotulo"], r["comissao"], numero, None,
-                                   f"Parecer {numero} sem data.", ev))
+            saida.append(_suspeita("relatorio-sem-data", r["rotulo"], r["comissao"], numero, None,
+                                   f"Relatório {numero} sem data do parecer.", ev))
     return saida
 
 
@@ -428,8 +430,8 @@ def tramita_depois_de_encerrada(encerrados: list[dict], passagens: list[dict],
             continue
         if (d := _dt(r["despachado_em"])) and d.date() > enc.date() + timedelta(days=1):
             fatos[r["rotulo"]].append((d, f"despacho {r['despacho']}"))
-        if r["parecer"] and (d := _dt(r["parecer_em"])) and d.date() > enc.date() + timedelta(days=1):
-            fatos[r["rotulo"]].append((d, f"parecer {r['parecer']} da {r['comissao']}"))
+        if r["relatorio"] and (d := _dt(r["parecer_em"])) and d.date() > enc.date() + timedelta(days=1):
+            fatos[r["rotulo"]].append((d, f"parecer da {r['comissao']} (relatório {r['relatorio']})"))
     saida = []
     for rotulo, lista in sorted(fatos.items()):
         enc, motivo = encerr[rotulo]
