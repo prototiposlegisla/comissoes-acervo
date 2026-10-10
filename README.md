@@ -130,7 +130,6 @@ O agendamento do GitHub às vezes atrasa horas (já atrasou seis). Por isso, uma
 | [`dados/`](dados/)                         | Os CSVs, que são o produto principal do projeto. Estão descritos em [Os dados](#os-dados).                                                  |
 | [`reconstrucao/`](reconstrucao/)           | O programa que reconstrói o acervo desde 2018; o resultado fica em [`dados/reconstrucao/`](dados/reconstrucao/).                            |
 | [`painel/`](painel/)                       | O gerador dos JSONs do site.                                                                                                                |
-| [`auditoria/`](auditoria/)                 | As regras que procuram erros de registro no SPLEGIS. O resultado é de uso interno da SGP e fica num repositório privado.                    |
 | [`site/`](site/)                           | O site: `index.html` (a estrutura da página), `app.js` (os gráficos e os filtros), `trajetorias.js` (a aba Trajetórias), `xlsx.js` (o relatório consolidado em Excel) e `estilo.css`.                                           |
 | [`tests/`](tests/)                         | Os testes automáticos.                                                                                                                      |
 | [`.github/workflows/`](.github/workflows/) | Os dois agendamentos: `coleta.yml` e `painel.yml`.                                                                                          |
