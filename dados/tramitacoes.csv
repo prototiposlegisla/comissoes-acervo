@@ -52,3 +52,7 @@ data,rotulo,tipo,de,para,motivo
 2026-10-09T10:52:50,PLO 6/2025,envio,EDUC,SAUDE,
 2026-10-09T11:54:11,PL 596/2026,excl_envio,PROC-CMSP,CCJ,
 2026-10-13T20:30:00,DOCREC 979/2026,envio,FIN,SGP21,Motivo: Com pareceres publicados.
+2026-10-14T14:56:02,PL 698/2024,envio,CCJ,ARQUIVO,Motivo: Encerrado-RETIRADO PELO AUTOR.
+2026-10-14T17:34:00,PL 100/2026,envio,CCJ,URB,Motivo: Com parecer publicado.
+2026-10-14T17:35:44,PL 100/2026,excl_envio,CCJ,URB,
+2026-10-14T17:55:00,PL 699/2026,envio,CCJ,SGP21,Motivo: Com pareceres publicados.
