@@ -56,3 +56,10 @@ data,rotulo,tipo,de,para,motivo
 2026-10-14T17:34:00,PL 100/2026,envio,CCJ,URB,Motivo: Com parecer publicado.
 2026-10-14T17:35:44,PL 100/2026,excl_envio,CCJ,URB,
 2026-10-14T17:55:00,PL 699/2026,envio,CCJ,SGP21,Motivo: Com pareceres publicados.
+2026-10-14T20:29:00,PL 526/2026,envio,CCJ,SGP12,Obs: aprovado em reunião conjunta de comissões.
+2026-10-14T20:31:00,PL 526/2026,envio,CCJ,SGP21,Motivo: A pedido. Obs: com parecer da CCJ pela reabertura da discussão..
+2026-10-14T20:31:37,PL 526/2026,excl_envio,CCJ,SGP12,
+2026-10-14T20:51:00,PL 699/2026,envio,CCJ,SGP12,Motivo: A pedido. Obs: aprovado em reunião conjunta de comissões..
+2026-10-14T20:51:38,PL 699/2026,excl_envio,CCJ,SGP21,
+2026-10-14T20:54:00,PL 153/2025,envio,EDUC,SGP12,Motivo: A pedido. Obs: aprovado em reunião conjunta de comissões..
+2026-10-14T21:01:00,PDL 60/2026,envio,EDUC,SGP12,Motivo: A pedido. Obs: aprovado em reunião conjunta de comissões..
