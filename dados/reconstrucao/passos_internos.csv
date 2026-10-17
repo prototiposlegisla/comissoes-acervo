@@ -1527,7 +1527,6 @@ ADM,DOCREC 191/2020,,,,,retrato
 ADM,DOCREC 202/2020,2020-03-11T16:28:00,,,,chegada
 ADM,DOCREC 203/2020,2020-03-11T16:50:00,,,,chegada
 EDUC,DOCREC 203/2020,2020-03-11T16:51:00,,,,chegada
-ADM,DOCREC 203/2020,2020-03-12T15:03:19,,,,chegada
 ADM,DOCREC 244/2020,,,,,retrato
 FIN,DOCREC 399/2020,2020-06-25T15:11:00,,,,chegada
 FIN,DOCREC 473/2020,2020-07-16T16:12:00,,,,chegada
@@ -1586,7 +1585,6 @@ FIN,DOCREC 502/2024,2024-07-24T14:51:00,Presidente da Comissão,Designar Relator
 FIN,DOCREC 502/2024,2024-11-06T11:25:45,Secretaria (SGP12),Em Condição de Pauta,,feed
 FIN,DOCREC 502/2024,2024-11-07T16:09:54,,,,chegada
 FIN,DOCREC 916/2024,2024-11-22T13:07:00,,,,chegada
-FIN,DOCREC 916/2024,2024-12-09T14:36:48,,,,chegada
 FIN,DOCREC 535/2025,2025-07-15T18:49:00,,,,chegada
 FIN,DOCREC 535/2025,2025-07-15T20:34:00,Presidente da Comissão,Designar Relator,,feed
 FIN,DOCREC 761/2026,2026-06-17T16:41:00,,,,chegada
@@ -26995,7 +26993,7 @@ CCJ,PL 446/2016,2018-09-12T16:33:46,Secretaria (SGP12),Adiado,,historico
 CCJ,PL 446/2016,2018-11-07T14:52:39,Secretaria,Aguardando Publicação do Parecer,,feed
 CCJ,PL 446/2016,2018-11-07T15:45:53,Secretaria,Deliberado,,feed
 URB,PL 446/2016,2018-11-08T15:37:13,,,,chegada
-URB,PL 446/2016,2018-11-08T20:04:55,,,,chegada
+CCJ,PL 446/2016,2018-11-08T20:04:55,,,,chegada
 EDUC,PL 452/2016,2018-09-13T17:00:36,Secretaria (SGP12),Aguardando Informações do Executivo,,historico
 EDUC,PL 452/2016,2018-12-03T14:31:52,Consultoria,Elaborar Pedido de Informações,,feed
 EDUC,PL 452/2016,2018-12-05T18:40:48,Relator,Análise do Estudo,,feed
@@ -61675,6 +61673,7 @@ URB,PL 626/2018,2019-11-27T18:53:23,Consultoria,Para análise,,feed
 URB,PL 626/2018,2019-12-03T18:46:53,Relator,Para Relatar,,feed
 URB,PL 626/2018,2019-12-17T14:06:08,Consultoria,Elaborar parecer,,feed
 URB,PL 626/2018,2019-12-18T16:43:33,Relator,Assinar Parecer,,feed
+URB,PL 626/2018,2020-07-27T12:33:57,,,,chegada
 CCJ,PL 627/2018,2019-01-09T13:21:00,,,,chegada
 CCJ,PL 627/2018,2019-01-09T17:38:11,Secretaria,Aguardando Designação de Relator,,feed
 CCJ,PL 627/2018,2019-02-20T14:55:17,Presidente da Comissão,Designar Relator,,feed
@@ -122180,9 +122179,7 @@ CCJ,PL 526/2021,2021-10-08T23:45:00,,,,chegada
 CCJ,PL 526/2021,2021-10-15T14:11:00,Presidente da Comissão,Designar Relator,,feed
 CCJ,PL 526/2021,2021-10-15T14:13:19,Secretaria,Aguardando Requerimento de Retirada,,feed
 CCJ,PL 526/2021,2021-10-15T14:18:42,,,,exclusao
-CCJ,PL 526/2021,2021-11-25T12:49:41,,,,chegada
 CCJ,PL 526/2021,2021-11-30T05:55:00,,,,chegada
-CCJ,PL 526/2021,2021-12-08T17:47:28,,,,chegada
 CCJ,PL 527/2021,2021-10-08T23:45:00,,,,chegada
 CCJ,PL 527/2021,2021-10-14T13:58:00,Presidente da Comissão,Designar Relator,,feed
 CCJ,PL 527/2021,2021-10-21T15:18:06,Procuradoria,Para análise e envio ao relator,,feed
@@ -123405,9 +123402,7 @@ CCJ,PL 575/2021,2025-06-09T16:21:55,Procuradoria,Aguardando Manifestação do(a)
 CCJ,PL 575/2021,2025-06-09T16:21:56,Relator(a),Estudo para manifestação do relator,,feed
 CCJ,PL 575/2021,2025-09-01T16:51:32,Secretaria (SGP12),Em Condição de Pauta,,feed
 CCJ,PL 576/2021,2021-09-29T13:42:00,,,,chegada
-CCJ,PL 576/2021,2021-09-29T18:48:38,,,,chegada
 CCJ,PL 576/2021,2021-10-08T23:30:00,,,,chegada
-CCJ,PL 576/2021,2021-12-13T15:43:17,,,,chegada
 CCJ,PL 577/2021,2021-09-03T17:44:00,,,,chegada
 CCJ,PL 577/2021,2021-09-03T17:50:00,Presidente da Comissão,Designar Relator,,feed
 CCJ,PL 577/2021,2021-09-08T11:24:03,Procuradoria,Para análise e envio ao relator,,feed

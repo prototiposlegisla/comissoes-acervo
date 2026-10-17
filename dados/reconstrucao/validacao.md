@@ -2,14 +2,14 @@
 
 - Eventos de 2018-10-26 a 2026-10-02; série de 2018-11-01 a 2026-10-02; retrato-âncora de 2026-10-03T06:53:36.
 - Eventos do feed: 427.296 (interna 204.958. envio 106.944. receb 99.387. outro 10.400. excl_envio 2.908. excl_interna 1.955. excl_receb 744).
-- Matérias que passaram por comissões: 11.589; presenças: 25.364.
+- Matérias que passaram por comissões: 11.589; presenças: 25.359.
 - Correções na fonte: {'recebimento suspeito confirmado': 1984, 'recebimento suspeito não resolvido (mantido)': 123, 'recebimento suspeito sem id': 2, 'recebimento suspeito sem histórico': 98, 'recebimento com dia/mês trocados (movido)': 51, 'excl_receb desconsiderada': 155, 'excl_envio desconsiderada': 16}.
-- Incoerências na sequência de eventos externos (quase todas fora das comissões): {'recebida': 509, 'recebimento': 41, 'enviada': 899, 'envio': 399, 'retrato': 1}.
+- Incoerências na sequência de eventos externos (quase todas fora das comissões): {'recebida': 508, 'recebimento': 40, 'enviada': 517, 'envio': 25, 'retrato': 1}.
 - Presenças iniciadas antes do feed, completadas com o histórico oficial: {'não completadas': 109, 'completadas': 1679}.
 
 ## A. Estado final × retrato real
 
-- Comissão onde a matéria está: 11.286/11.292 (99.95%)
+- Comissão onde a matéria está: 11.287/11.292 (99.96%)
 - Data de envio à comissão. mesmo dia: 3.821/3.821 (100.00%) (3.790 idênticas até o segundo)
 - Data de recebimento. mesmo dia: 3.821/3.821 (100.00%) (3.821 idênticas até o segundo)
 - Último passo interno: 3.120/3.137 (99.46%)
@@ -63,7 +63,6 @@
 
 ## Exemplos
 
-- A/comissão: ('DOCREC 203/2020', 'ADM', None)
 - A/comissão: ('DOCREC 501/2017', 'URB', None)
 - A/comissão: ('DOCREC 891/2015', 'URB', None)
 - A/comissão: ('DOCREC 953/2015', 'URB', None)

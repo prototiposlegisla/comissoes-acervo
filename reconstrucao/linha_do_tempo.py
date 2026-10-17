@@ -28,6 +28,26 @@ class Trecho:
     enviado_em: str | None = None
     recebido_em: str | None = None
     motivo: str | None = None  # do envio que levou a matéria a `loc` ("" = envio desfeito)
+    desfeito_em: str | None = None  # quando o envio que levou a matéria a `loc` foi excluído
+
+
+def _desfazer(lista: list[Trecho], estada: Trecho, t: str) -> None:
+    """Marca os trechos da estada cujo envio foi excluído em `t`."""
+    if estada.estada is None:
+        return
+    for tr in lista:
+        if (tr.loc, tr.estada) == (estada.loc, estada.estada):
+            tr.desfeito_em = t
+
+
+def _destino_trocado(pilha: list[Trecho], excl: Evento) -> bool:
+    """A exclusão desfaz o envio logo abaixo do topo, e o topo saiu da mesma origem: é a
+    troca de destino do SPLEGIS (A envia a B, A envia a C, exclui A→B)."""
+    if len(pilha) < 2:
+        return False
+    topo, errada = pilha[-1], pilha[-2]
+    return (errada.loc == excl.para and errada.enviado_por == excl.de and errada.estada is not None
+            and topo.enviado_por == excl.de)
 
 
 def trechos(externos: list[Evento], ancora: dict | None) -> tuple[list[Trecho], list[str]]:
@@ -73,9 +93,18 @@ def trechos(externos: list[Evento], ancora: dict | None) -> tuple[list[Trecho], 
             ignorados = {}
         elif e.tipo == "excl_envio":
             if topo.loc != e.para:
+                if _destino_trocado(pilha, e):
+                    # Troca de destino: a área reenviou a outro destino e só depois excluiu o envio
+                    # errado. A estada no destino errado valeu até o reenvio, mas fica marcada
+                    # como desfeita (o histórico de hoje não a mostra); a matéria segue no novo.
+                    _desfazer(lista, pilha.pop(-2), e.t)
+                    aviso = f"{topo.estada} enviada de {e.de} estando em {e.para}"
+                    if aviso in anomalias:
+                        anomalias.remove(aviso)
+                    continue
                 anomalias.append(f"{e.t} envio para {e.para} excluído estando em {topo.loc}")
                 continue
-            pilha.pop()
+            _desfazer(lista, pilha.pop(), e.t)
             if not pilha:  # a estada anterior começou antes do feed
                 pilha.append(Trecho(None, e.de, None))
             ignorados = {}
@@ -125,6 +154,7 @@ class Presenca:
     destino: str | None
     passos: list[Passo]
     motivo_saida: str | None = None  # motivo do envio que tirou a matéria da comissão
+    desfeito_em: str | None = None   # o envio à comissão foi excluído depois (a estada não consta do histórico)
 
 
 def _passos_do_feed(p: Presenca, internas: list[Evento]) -> list[Passo]:
@@ -176,7 +206,8 @@ def presencas(rotulo: str, lista: list[Trecho], internas: list[Evento],
         ultimo = g[-1]
         p = Presenca(g[0].loc, rotulo, g[0].inicio, seguinte.inicio if seguinte else None,
                      ultimo.enviado_por, ultimo.enviado_em, ultimo.recebido_em,
-                     seguinte.loc if seguinte else None, [], seguinte.motivo if seguinte else None)
+                     seguinte.loc if seguinte else None, [], seguinte.motivo if seguinte else None,
+                     ultimo.desfeito_em)
         p.passos = _passos_do_feed(p, internas)
         if p.ate is None and ancora is not None and ancora["comissao"] == p.comissao:
             # Presença que chega ao retrato: completa o que os eventos não disseram.

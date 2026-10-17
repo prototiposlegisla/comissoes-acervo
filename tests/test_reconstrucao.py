@@ -101,6 +101,47 @@ class TestLinhaDoTempo(unittest.TestCase):
         self.assertEqual([(p.comissao, p.desde, p.ate) for p in ps],
                          [("CCJ", "2021-02-25T12:12:00", "2021-07-05T19:00:00")])
 
+    def test_envio_desfeito_marca_a_estada(self):
+        # PDL 49/2026: envio à CCJ excluído duas horas depois e refeito no dia seguinte.
+        externos = [ev("2026-05-07T16:09:00", tipo="envio", de="PROC-CMSP", para="CCJ"),
+                    ev("2026-05-07T18:29:47", tipo="excl_envio", de="PROC-CMSP", para="CCJ"),
+                    ev("2026-05-08T10:16:00", tipo="envio", de="PROC-CMSP", para="CCJ"),
+                    ev("2026-05-08T11:38:00", tipo="receb", de="PROC-CMSP", para="CCJ")]
+        lista, _ = trechos(externos, None)
+        ps = presencas("PDL 49/2026", lista, [], None, "2018-10-26T00:00:00")
+        self.assertEqual([(p.desde, p.ate, p.recebido_em, p.desfeito_em) for p in ps], [
+            ("2026-05-07T16:09:00", "2026-05-07T18:29:47", "", "2026-05-07T18:29:47"),
+            ("2026-05-08T10:16:00", None, "2026-05-08T11:38:00", None)])
+
+    def test_troca_de_destino_marca_a_estada_errada(self):
+        # PL 799/2024: a SGP21 enviou à CCJ por engano, reenviou à URB e só depois excluiu o envio à CCJ.
+        externos = [ev("2024-11-26T14:49:35", tipo="envio", de="SGP12", para="SGP21"),
+                    ev("2024-12-20T21:51:00", tipo="envio", de="SGP21", para="CCJ"),
+                    ev("2025-01-08T17:33:00", tipo="envio", de="SGP21", para="URB", motivo="Motivo: Para redação final."),
+                    ev("2025-01-08T17:33:15", tipo="excl_envio", de="SGP21", para="CCJ"),
+                    ev("2025-01-08T21:04:00", tipo="receb", de="SGP21", para="URB")]
+        lista, anomalias = trechos(externos, None)
+        self.assertEqual(anomalias, [])
+        ps = presencas("PL 799/2024", lista, [], None, "2018-10-26T00:00:00")
+        self.assertEqual([(p.comissao, p.desde, p.ate, p.destino, p.recebido_em, p.desfeito_em) for p in ps], [
+            ("CCJ", "2024-12-20T21:51:00", "2025-01-08T17:33:00", "URB", "", "2025-01-08T17:33:15"),
+            ("URB", "2025-01-08T17:33:00", None, None, "2025-01-08T21:04:00", None)])
+
+    def test_troca_de_destino_depois_do_recebimento(self):
+        # PL 142/2019: a ADM chegou a receber; depois a CCJ reenviou à EDUC e excluiu o envio à ADM.
+        externos = [ev("2019-05-01T10:00:00", tipo="envio", de="PROC-CMSP", para="CCJ"),
+                    ev("2019-05-24T12:14:00", tipo="envio", de="CCJ", para="ADM"),
+                    ev("2019-05-27T10:00:00", tipo="receb", de="CCJ", para="ADM"),
+                    ev("2019-05-30T10:31:00", tipo="envio", de="CCJ", para="EDUC"),
+                    ev("2019-05-30T10:31:44", tipo="excl_envio", de="CCJ", para="ADM")]
+        lista, anomalias = trechos(externos, None)
+        self.assertEqual(anomalias, [])
+        ps = presencas("PL 142/2019", lista, [], None, "2018-10-26T00:00:00")
+        self.assertEqual([(p.comissao, p.ate, p.recebido_em, p.desfeito_em) for p in ps], [
+            ("CCJ", "2019-05-24T12:14:00", "", None),
+            ("ADM", "2019-05-30T10:31:00", "2019-05-27T10:00:00", "2019-05-30T10:31:44"),
+            ("EDUC", None, "", None)])
+
     def test_historico_completa_estada_anterior_ao_feed(self):
         p = Presenca("FIN", "DOCREC 15/2012", None, "2026-08-10T10:00:00", None, None, None, "ver. X", [])
         linhas = [("2012-01-05T16:05:38", "SGP22/Encaminhado para FIN", ""),
