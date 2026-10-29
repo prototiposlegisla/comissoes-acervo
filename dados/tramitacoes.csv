@@ -195,3 +195,46 @@ data,rotulo,tipo,de,para,motivo
 2026-10-23T17:13:38,DOCREC 1299/2026,excl_envio,SAUDE,SGP23,
 2026-10-27T13:11:00,PL 1474/2025,envio,SGP12,CCJ,Motivo: Para redação final/conforme o vencido.
 2026-10-28T17:19:00,PL 736/2026,envio,CCJ,SGP12,Obs: Aprovado em reunião conjunta.
+2026-10-29T11:04:00,PDL 107/2026,envio,PROC-CMSP,CCJ,Motivo: Para apreciação pelas Comissões.
+2026-10-29T11:04:00,PDL 108/2026,envio,PROC-CMSP,CCJ,Motivo: Para apreciação pelas Comissões.
+2026-10-29T11:04:00,PDL 109/2026,envio,PROC-CMSP,CCJ,Motivo: Para apreciação pelas Comissões.
+2026-10-29T11:04:00,PDL 110/2026,envio,PROC-CMSP,CCJ,Motivo: Para apreciação pelas Comissões.
+2026-10-29T11:04:00,PDL 111/2026,envio,PROC-CMSP,CCJ,Motivo: Para apreciação pelas Comissões.
+2026-10-29T11:04:00,PDL 112/2026,envio,PROC-CMSP,CCJ,Motivo: Para apreciação pelas Comissões.
+2026-10-29T11:04:00,PDL 113/2026,envio,PROC-CMSP,CCJ,Motivo: Para apreciação pelas Comissões.
+2026-10-29T11:04:00,PDL 114/2026,envio,PROC-CMSP,CCJ,Motivo: Para apreciação pelas Comissões.
+2026-10-29T11:04:00,PL 374/2026,envio,PROC-CMSP,CCJ,Motivo: Para apreciação pelas Comissões.
+2026-10-29T11:04:00,PL 577/2026,envio,PROC-CMSP,CCJ,Motivo: Para apreciação pelas Comissões.
+2026-10-29T11:04:00,PL 724/2026,envio,PROC-CMSP,CCJ,Motivo: Para apreciação pelas Comissões.
+2026-10-29T11:04:00,PL 744/2026,envio,PROC-CMSP,CCJ,Motivo: Para apreciação pelas Comissões.
+2026-10-29T11:04:00,PL 745/2026,envio,PROC-CMSP,CCJ,Motivo: Para apreciação pelas Comissões.
+2026-10-29T11:04:00,PL 746/2026,envio,PROC-CMSP,CCJ,Motivo: Para apreciação pelas Comissões.
+2026-10-29T11:04:00,PL 747/2026,envio,PROC-CMSP,CCJ,Motivo: Para apreciação pelas Comissões.
+2026-10-29T11:04:00,PL 748/2026,envio,PROC-CMSP,CCJ,Motivo: Para apreciação pelas Comissões.
+2026-10-29T11:04:00,PL 751/2026,envio,PROC-CMSP,CCJ,Motivo: Para apreciação pelas Comissões.
+2026-10-29T11:04:00,PL 758/2026,envio,PROC-CMSP,CCJ,Motivo: Para apreciação pelas Comissões.
+2026-10-29T11:04:00,PL 760/2026,envio,PROC-CMSP,CCJ,Motivo: Para apreciação pelas Comissões.
+2026-10-29T11:04:00,PL 761/2026,envio,PROC-CMSP,CCJ,Motivo: Para apreciação pelas Comissões.
+2026-10-29T11:04:00,PL 762/2026,envio,PROC-CMSP,CCJ,Motivo: Para apreciação pelas Comissões.
+2026-10-29T11:04:00,PL 763/2026,envio,PROC-CMSP,CCJ,Motivo: Para apreciação pelas Comissões.
+2026-10-29T11:04:00,PL 764/2026,envio,PROC-CMSP,CCJ,Motivo: Para apreciação pelas Comissões.
+2026-10-29T11:04:00,PL 765/2026,envio,PROC-CMSP,CCJ,Motivo: Para apreciação pelas Comissões.
+2026-10-29T11:04:00,PL 766/2026,envio,PROC-CMSP,CCJ,Motivo: Para apreciação pelas Comissões.
+2026-10-29T11:04:00,PL 767/2026,envio,PROC-CMSP,CCJ,Motivo: Para apreciação pelas Comissões.
+2026-10-29T11:04:00,PL 768/2026,envio,PROC-CMSP,CCJ,Motivo: Para apreciação pelas Comissões.
+2026-10-29T11:04:00,PL 769/2026,envio,PROC-CMSP,CCJ,Motivo: Para apreciação pelas Comissões.
+2026-10-29T11:04:00,PL 770/2026,envio,PROC-CMSP,CCJ,Motivo: Para apreciação pelas Comissões.
+2026-10-29T11:04:00,PL 771/2026,envio,PROC-CMSP,CCJ,Motivo: Para apreciação pelas Comissões.
+2026-10-29T11:04:00,PL 772/2026,envio,PROC-CMSP,CCJ,Motivo: Para apreciação pelas Comissões.
+2026-10-29T11:04:00,PL 773/2026,envio,PROC-CMSP,CCJ,Motivo: Para apreciação pelas Comissões.
+2026-10-29T11:04:00,PL 777/2026,envio,PROC-CMSP,CCJ,Motivo: Para apreciação pelas Comissões.
+2026-10-29T11:04:00,PLO 6/2026,envio,PROC-CMSP,CCJ,Motivo: Para apreciação pelas Comissões.
+2026-10-29T11:04:00,PR 29/2026,envio,PROC-CMSP,CCJ,Motivo: Para apreciação pelas Comissões.
+2026-10-29T11:04:00,PR 30/2026,envio,PROC-CMSP,CCJ,Motivo: Para apreciação pelas Comissões.
+2026-10-29T11:04:00,PR 31/2026,envio,PROC-CMSP,CCJ,Motivo: Para apreciação pelas Comissões.
+2026-10-29T11:12:00,PL 551/2026,envio,PROC-CMSP,CCJ,
+2026-10-29T11:12:00,PL 722/2026,envio,PROC-CMSP,CCJ,
+2026-10-29T11:12:00,PL 750/2026,envio,PROC-CMSP,CCJ,
+2026-10-29T11:12:00,PL 757/2026,envio,PROC-CMSP,CCJ,
+2026-10-29T11:12:00,PL 759/2026,envio,PROC-CMSP,CCJ,
+2026-10-29T15:13:00,PL 550/2025,envio,SGP21,CCJ,Motivo: Para redação final/conforme o vencido.
