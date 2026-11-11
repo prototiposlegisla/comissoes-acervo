@@ -3446,6 +3446,7 @@ materia_id,ordem,autor_codigo,autor,classe
 743379,1,2219,Ver. MARCELO MESSIAS (MDB),Vereador
 743379,2,2279,Ver. SILVINHO LEITE (UNIÃO),Vereador
 743379,3,2221,Ver. ELI CORRÊA (UNIÃO),Vereador
+743379,4,2160,Ver. JOÃO JORGE (MDB),Vereador
 743678,1,2185,Ver. CELSO GIANNAZI (PSOL),Vereador
 743714,1,2146,Ver. GILBERTO NASCIMENTO (PL),Vereador
 743732,1,2206,Ver. SILVIA DA BANCADA FEMINISTA (PSOL),Vereador
@@ -5573,4 +5574,5 @@ materia_id,ordem,autor_codigo,autor,classe
 820461,1,2229,Executivo - RICARDO NUNES,Promovente
 820660,1,1487,Ver. RICARDO TEIXEIRA (UNIÃO),Vereador
 820660,2,2224,Ver. SANDRA SANTANA (MDB),Vereador
+820660,3,1647,Ver. EDIR SALES (PSD),Vereador
 821115,1,2229,Executivo - RICARDO NUNES,Promovente
